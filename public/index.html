@@ -237,7 +237,7 @@
   <div class="layout">
     <header class="panel panel--hero">
       <h1 id="siteTitle">Notifications</h1>
-      <p class="sub" id="siteSub">Arifa za FCM — tuma sasa au ratiba</p>
+      <p class="sub" id="siteSub">Arifa za FCM — tuma sasa</p>
       <div class="chips">
         <div class="chip"><span>Topic</span> <strong id="topicDisplay">—</strong></div>
         <div class="chip" id="tzChip" style="display:none;"><span>Muda</span> <strong id="tzDisplay"></strong></div>
@@ -258,7 +258,7 @@
       <h2>Ingia (admin)</h2>
       <p class="hint" style="margin-top:0;">
         Server inatumia <code>ADMIN_SECRET</code> kwenye <code>.env</code>. Weka hapa nenosiri <strong>lile lile</strong> ili
-        <strong>kutuma arifa sasa</strong> na <strong>kudhibiti ratiba</strong>. Hii siyo akaunti ya Google — ni neno ulijiseti wewe mwenyeji wa server.
+        <strong>kutuma arifa sasa</strong>. Hii siyo akaunti ya Google — ni neno ulijiseti wewe mwenyeji wa server.
       </p>
       <label for="adminKey">Nenosiri la admin</label>
       <input id="adminKey" type="password" placeholder="Siri sawa na ADMIN_SECRET kwenye .env" autocomplete="current-password" />
@@ -285,11 +285,17 @@
       <div id="out" class="out" aria-live="polite"></div>
     </section>
 
-    <section class="panel">
-      <h2>Ratiba</h2>
-      <p class="hint" style="margin-top:0;">
+    <!-- Ratiba: imefichwa kwenye UI (API /api/schedule bado ipo kwa matumizi ya ndani / baadaye). Weka SHOW_SCHEDULE_UI = true kwenye script kuirudisha. -->
+    <section id="schedPanelSection" class="panel" hidden aria-hidden="true">
+      <h2 id="schedPanelTitle">Ratiba</h2>
+      <p id="schedIntro" class="hint" style="margin-top:0;">
         Mara moja au kila siku (saa kwa <span id="tzHint">TZ</span>).
         <strong>Ratiba</strong> inatekelezwa na server kila dakika — sio kitufe cha &quot;Tuma sasa&quot;.
+      </p>
+      <p id="schedEphemeralNote" class="hint" style="display:none;margin-top:0;">
+        Kwenye seva hii ratiba haiwezi kuhifadhiwa kudumu (mfano Vercel: hifadhi ni ya muda mfupi), kwa hiyo
+        baada ya kuonyesha upya ukurasa orodha inaonekana tupu hata ukiwa umehifadhi kabla.
+        Tumia fomu hapa chini kutuma arifa <strong>mara moja</strong> — kazi sawa na &quot;Tuma sasa&quot; juu.
       </p>
       <p id="cronHint" class="cron-hint" style="display:none;"></p>
 
@@ -300,27 +306,35 @@
         <textarea id="sBody" placeholder="Hiari"></textarea>
         <label for="sImage">Picha URL</label>
         <input id="sImage" type="url" placeholder="https://..." />
-        <label for="sMode">Aina</label>
-        <select id="sMode">
-          <option value="once">Mara moja</option>
-          <option value="daily">Kila siku</option>
-        </select>
-        <div id="onceFields">
-          <label for="sRunAt">Tarehe na saa</label>
-          <input id="sRunAt" type="datetime-local" />
-        </div>
-        <div id="dailyFields" style="display:none;">
-          <label for="sDailyTime">Saa</label>
-          <input id="sDailyTime" type="time" />
+        <!-- Ratiba ya JSON (mara moja / kila siku): inapatikana tu wakati schedulePersistent === true (faili ya kudumu). -->
+        <div id="schedTimingWrap">
+          <label for="sMode">Aina</label>
+          <select id="sMode">
+            <option value="once">Mara moja</option>
+            <option value="daily">Kila siku</option>
+          </select>
+          <div id="onceFields">
+            <label for="sRunAt">Tarehe na saa</label>
+            <input id="sRunAt" type="datetime-local" />
+          </div>
+          <div id="dailyFields" style="display:none;">
+            <label for="sDailyTime">Saa</label>
+            <input id="sDailyTime" type="time" />
+          </div>
         </div>
         <button type="submit" class="primary" id="schedBtn">Ongeza ratiba</button>
       </form>
       <div id="schedOut" class="out" style="min-height:1rem;"></div>
-      <div id="schedList"></div>
+      <div id="schedListWrap">
+        <div id="schedList"></div>
+      </div>
     </section>
   </div>
 
   <script>
+    /** Weka true kurudisha paneli ya ratiba kwenye UI. */
+    const SHOW_SCHEDULE_UI = false;
+
     const ADMIN_KEY = 'webNotifyAdminSecret';
     const out = document.getElementById('out');
     const btn = document.getElementById('btn');
@@ -329,13 +343,18 @@
     const adminWrap = document.getElementById('adminWrap');
     const adminInput = document.getElementById('adminKey');
     const schedBtn = document.getElementById('schedBtn');
+    const schedPanelSection = document.getElementById('schedPanelSection');
+    if (SHOW_SCHEDULE_UI && schedPanelSection) {
+      schedPanelSection.removeAttribute('hidden');
+      schedPanelSection.removeAttribute('aria-hidden');
+    }
 
     adminInput.value = sessionStorage.getItem(ADMIN_KEY) || '';
     function persistAdminKey() {
       sessionStorage.setItem(ADMIN_KEY, adminInput.value.trim());
       updateAuthGates();
-      if (sendScheduleAllowed()) loadSchedules();
-      else {
+      if (SHOW_SCHEDULE_UI && sendScheduleAllowed() && scheduleModePersistent()) loadSchedules();
+      else if (SHOW_SCHEDULE_UI) {
         schedList.innerHTML = '';
         schedOut.textContent = '';
         schedOut.className = 'out';
@@ -344,11 +363,34 @@
     adminInput.addEventListener('change', persistAdminKey);
     adminInput.addEventListener('input', persistAdminKey);
 
+    function scheduleModePersistent() {
+      if (!meta || meta.schedulePersistent === false) return false;
+      return true;
+    }
+
+    function applySchedulePanelMode() {
+      if (!SHOW_SCHEDULE_UI) return;
+      const persistent = scheduleModePersistent();
+      const timing = document.getElementById('schedTimingWrap');
+      const listWrap = document.getElementById('schedListWrap');
+      const intro = document.getElementById('schedIntro');
+      const ephem = document.getElementById('schedEphemeralNote');
+      const cronHint = document.getElementById('cronHint');
+      const titleEl = document.getElementById('schedPanelTitle');
+      if (timing) timing.style.display = persistent ? 'block' : 'none';
+      if (listWrap) listWrap.style.display = persistent ? 'block' : 'none';
+      if (intro) intro.style.display = persistent ? 'block' : 'none';
+      if (ephem) ephem.style.display = persistent ? 'none' : 'block';
+      if (titleEl) titleEl.textContent = persistent ? 'Ratiba' : 'Tuma sasa';
+      schedBtn.textContent = persistent ? 'Ongeza ratiba' : 'Tuma sasa';
+      if (!persistent && cronHint) cronHint.style.display = 'none';
+    }
+
     function hasAdminKey() {
       return (adminInput.value || sessionStorage.getItem(ADMIN_KEY) || '').trim().length > 0;
     }
 
-    /** Tuma / ratiba vinaweza kutumika kwenye kivinjari */
+    /** Tuma (na ratiba ikiwa imeonyeshwa) vinaweza kutumika kwenye kivinjari */
     function sendScheduleAllowed() {
       if (!meta || meta.adminAuthOpen) return true;
       if (meta.adminSecretMissing) return false;
@@ -362,7 +404,7 @@
     function updateAuthGates() {
       const ok = sendScheduleAllowed();
       btn.disabled = !ok;
-      schedBtn.disabled = !ok;
+      if (SHOW_SCHEDULE_UI) schedBtn.disabled = !ok;
     }
 
     function adminHeaders() {
@@ -384,6 +426,7 @@
       siteName: 'Notifications',
       topic: '',
       scheduleTz: 'UTC',
+      schedulePersistent: true,
       adminAuthOpen: false,
       adminRequired: true,
       adminSecretMissing: false,
@@ -398,7 +441,7 @@
         document.getElementById('siteTitle').textContent = j.siteName || 'Notifications';
         document.title = (j.siteName || 'Notifications') + ' — FCM';
         document.getElementById('topicDisplay').textContent = j.topic || '—';
-        if (j.scheduleTz) {
+        if (SHOW_SCHEDULE_UI && j.scheduleTz) {
           document.getElementById('tzChip').style.display = 'inline-flex';
           document.getElementById('tzDisplay').textContent = j.scheduleTz;
           document.getElementById('tzHint').textContent = j.scheduleTz;
@@ -426,24 +469,32 @@
         const cronChip = document.getElementById('cronChip');
         const cronDot = document.getElementById('cronDot');
         const cronHint = document.getElementById('cronHint');
-        cronChip.style.display = 'inline-flex';
-        const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-        if (j.cronConfigured) {
-          cronDot.classList.remove('off');
-          cronHint.style.display = 'none';
+        if (SHOW_SCHEDULE_UI) {
+          cronChip.style.display = 'inline-flex';
+          const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+          if (j.schedulePersistent !== false) {
+            if (j.cronConfigured) {
+              cronDot.classList.remove('off');
+              cronHint.style.display = 'none';
+            } else {
+              cronDot.classList.add('off');
+              cronHint.style.display = 'block';
+              cronHint.textContent = isLocal
+                ? 'PC: ratiba hutekelezwa kila dakika na server. Maelezo ya CRON / ADMIN: soma README.md kwenye repo.'
+                : 'Weka CRON_SECRET sawa .env na Vercel. Kiungo cha cron: https://<domain-yako>/api/cron — maelezo kamili README.md.';
+            }
+          }
         } else {
-          cronDot.classList.add('off');
-          cronHint.style.display = 'block';
-          cronHint.textContent = isLocal
-            ? 'PC: ratiba hutekelezwa kila dakika na server. Maelezo ya CRON / ADMIN: soma README.md kwenye repo.'
-            : 'Weka CRON_SECRET sawa .env na Vercel. Kiungo cha cron: https://<domain-yako>/api/cron — maelezo kamili README.md.';
+          cronChip.style.display = 'none';
         }
+        applySchedulePanelMode();
         updateAuthGates();
-        if (sendScheduleAllowed()) loadSchedules();
+        if (SHOW_SCHEDULE_UI && sendScheduleAllowed() && scheduleModePersistent()) loadSchedules();
       })
       .catch(() => {
+        applySchedulePanelMode();
         updateAuthGates();
-        if (sendScheduleAllowed()) loadSchedules();
+        if (SHOW_SCHEDULE_UI && sendScheduleAllowed() && scheduleModePersistent()) loadSchedules();
       });
 
     document.getElementById('clearAdminKey').addEventListener('click', () => {
@@ -452,11 +503,13 @@
       updateAuthGates();
     });
 
-    document.getElementById('sMode').addEventListener('change', () => {
-      const once = document.getElementById('sMode').value === 'once';
-      document.getElementById('onceFields').style.display = once ? 'block' : 'none';
-      document.getElementById('dailyFields').style.display = once ? 'none' : 'block';
-    });
+    if (SHOW_SCHEDULE_UI) {
+      document.getElementById('sMode').addEventListener('change', () => {
+        const once = document.getElementById('sMode').value === 'once';
+        document.getElementById('onceFields').style.display = once ? 'block' : 'none';
+        document.getElementById('dailyFields').style.display = once ? 'none' : 'block';
+      });
+    }
 
     document.getElementById('f').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -500,6 +553,7 @@
     });
 
     async function loadSchedules() {
+      if (!SHOW_SCHEDULE_UI || !scheduleModePersistent()) return;
       schedList.innerHTML = '';
       schedOut.textContent = '';
       schedOut.className = 'out';
@@ -591,62 +645,97 @@
       }
     }
 
-    document.getElementById('schedForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (!sendScheduleAllowed()) {
-        schedOut.className = 'out err';
-        schedOut.textContent = meta.adminSecretMissing
-          ? 'Seva haina ADMIN_SECRET — weka kwenye .env.local kisha anzisha upya server.'
-          : 'Weka kwanza nenosiri la admin hapo juu.';
-        return;
-      }
-      schedOut.textContent = '';
-      schedOut.className = 'out';
-      const mode = document.getElementById('sMode').value;
-      const title = document.getElementById('sTitle').value.trim();
-      const body = document.getElementById('sBody').value.trim();
-      const image = document.getElementById('sImage').value.trim();
-      const payload = { title, body, image, mode };
-      if (mode === 'once') {
-        const local = document.getElementById('sRunAt').value;
-        if (!local) {
+    if (SHOW_SCHEDULE_UI) {
+      document.getElementById('schedForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!sendScheduleAllowed()) {
           schedOut.className = 'out err';
-          schedOut.textContent = 'Chagua tarehe na saa.';
+          schedOut.textContent = meta.adminSecretMissing
+            ? 'Seva haina ADMIN_SECRET — weka kwenye .env.local kisha anzisha upya server.'
+            : 'Weka kwanza nenosiri la admin hapo juu.';
           return;
         }
-        payload.runAt = new Date(local).toISOString();
-      } else {
-        const t = document.getElementById('sDailyTime').value;
-        if (!t) {
-          schedOut.className = 'out err';
-          schedOut.textContent = 'Chagua saa.';
+        schedOut.textContent = '';
+        schedOut.className = 'out';
+
+        if (!scheduleModePersistent()) {
+          schedBtn.disabled = true;
+          const title = document.getElementById('sTitle').value.trim();
+          const body = document.getElementById('sBody').value.trim();
+          const image = document.getElementById('sImage').value.trim();
+          try {
+            const res = await fetch('/api/send', {
+              method: 'POST',
+              headers: adminHeaders(),
+              body: JSON.stringify({ title, body, image }),
+            });
+            const text = await res.text();
+            let msg = text;
+            try {
+              const j = JSON.parse(text);
+              msg = j.error || j.message || JSON.stringify(j, null, 2);
+            } catch (_) {}
+            if (res.ok) {
+              schedOut.className = 'out ok';
+              schedOut.textContent = 'Imefanikiwa:\n' + msg;
+            } else {
+              schedOut.className = 'out err';
+              schedOut.textContent = 'Hitilafu (' + res.status + '):\n' + msg;
+            }
+          } catch (err) {
+            schedOut.className = 'out err';
+            schedOut.textContent = 'Mtandao: ' + (err && err.message ? err.message : String(err));
+          }
+          schedBtn.disabled = false;
           return;
         }
-        payload.dailyTime = t.length === 5 ? t : t.slice(0, 5);
-      }
-      try {
-        const res = await fetch('/api/schedule', {
-          method: 'POST',
-          headers: adminHeaders(),
-          body: JSON.stringify(payload),
-        });
-        const j = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          schedOut.className = 'out err';
-          schedOut.textContent = j.error || res.statusText;
-          return;
+
+        const mode = document.getElementById('sMode').value;
+        const title = document.getElementById('sTitle').value.trim();
+        const body = document.getElementById('sBody').value.trim();
+        const image = document.getElementById('sImage').value.trim();
+        const payload = { title, body, image, mode };
+        if (mode === 'once') {
+          const local = document.getElementById('sRunAt').value;
+          if (!local) {
+            schedOut.className = 'out err';
+            schedOut.textContent = 'Chagua tarehe na saa.';
+            return;
+          }
+          payload.runAt = new Date(local).toISOString();
+        } else {
+          const t = document.getElementById('sDailyTime').value;
+          if (!t) {
+            schedOut.className = 'out err';
+            schedOut.textContent = 'Chagua saa.';
+            return;
+          }
+          payload.dailyTime = t.length === 5 ? t : t.slice(0, 5);
         }
-        schedOut.className = 'out ok';
-        schedOut.textContent = 'Imehifadhiwa.';
-        document.getElementById('schedForm').reset();
-        document.getElementById('sMode').value = mode;
-        document.getElementById('sMode').dispatchEvent(new Event('change'));
-        await loadSchedules();
-      } catch (err) {
-        schedOut.className = 'out err';
-        schedOut.textContent = String(err.message || err);
-      }
-    });
+        try {
+          const res = await fetch('/api/schedule', {
+            method: 'POST',
+            headers: adminHeaders(),
+            body: JSON.stringify(payload),
+          });
+          const j = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            schedOut.className = 'out err';
+            schedOut.textContent = j.error || res.statusText;
+            return;
+          }
+          schedOut.className = 'out ok';
+          schedOut.textContent = 'Imehifadhiwa.';
+          document.getElementById('schedForm').reset();
+          document.getElementById('sMode').value = mode;
+          document.getElementById('sMode').dispatchEvent(new Event('change'));
+          await loadSchedules();
+        } catch (err) {
+          schedOut.className = 'out err';
+          schedOut.textContent = String(err.message || err);
+        }
+      });
+    }
 
     updateAuthGates();
   </script>

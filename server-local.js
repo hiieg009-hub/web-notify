@@ -14,6 +14,7 @@ const {
   isAdminAuthOpen,
   getCronSecret,
   cronAuthorized,
+  isScheduleStorageEphemeral,
 } = require('./lib/config');
 const { handleSchedule } = require('./lib/scheduleController');
 const { processDueSchedules } = require('./lib/scheduleEngine');
@@ -70,6 +71,7 @@ const server = http.createServer(async (req, res) => {
       siteName: getSiteName(),
       topic: getFixedTopic(),
       scheduleTz: getScheduleTz(),
+      schedulePersistent: !isScheduleStorageEphemeral(),
       adminAuthOpen: isAdminAuthOpen(),
       adminRequired: !isAdminAuthOpen(),
       adminSecretMissing: adminSetupError(),

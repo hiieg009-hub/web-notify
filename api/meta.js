@@ -12,6 +12,7 @@ const {
   isAdminAuthOpen,
   adminSetupError,
   getCronSecret,
+  isScheduleStorageEphemeral,
 } = require('../lib/config');
 
 module.exports = (req, res) => {
@@ -31,6 +32,7 @@ module.exports = (req, res) => {
     siteName: getSiteName(),
     topic: getFixedTopic(),
     scheduleTz: getScheduleTz(),
+    schedulePersistent: !isScheduleStorageEphemeral(),
     adminAuthOpen: isAdminAuthOpen(),
     adminRequired: !isAdminAuthOpen(),
     adminSecretMissing: adminSetupError(),
