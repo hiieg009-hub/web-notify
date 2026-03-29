@@ -135,7 +135,7 @@ Diski ya Vercel **haina kudumu** kwa kuandika faili: ratiba zinaweza **kupotea**
 
 ### Cron ya Vercel
 
-`vercel.json` ina cron kila **dakika 5** inayolenga path **`/api/cron`**. Weka `CRON_SECRET` kwenye Environment Variables ya Vercel. URL halisi ni **`https://<domain-yako>/api/cron`** — ona jedwali kwenye sehemu **Kiungo cha cron job** hapo juu.
+`vercel.json` ina cron **mara moja kwa siku** (`0 6 * * *` = saa 6:00 **UTC**) inayolenga **`/api/cron`**. Hii inalingana na mipaka ya **Vercel Hobby** (cron si zaidi ya mara moja kwa siku). Kwa mara nyingi kwa siku unahitaji **Pro** au huduma ya nje (cron-job.org) inayopiga URL yako. Weka `CRON_SECRET` kwenye Environment Variables. URL: **`https://<domain-yako>/api/cron`**.
 
 ---
 
