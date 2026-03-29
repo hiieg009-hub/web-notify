@@ -6,7 +6,12 @@ try {
 } catch (_) {}
 
 const { getFixedTopic } = require('../lib/fcmSend');
-const { getSiteName, getScheduleTz, adminSecretConfigured } = require('../lib/config');
+const {
+  getSiteName,
+  getScheduleTz,
+  adminSecretConfigured,
+  getCronSecret,
+} = require('../lib/config');
 
 module.exports = (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -26,5 +31,6 @@ module.exports = (req, res) => {
     topic: getFixedTopic(),
     scheduleTz: getScheduleTz(),
     adminRequired: adminSecretConfigured(),
+    cronConfigured: !!getCronSecret(),
   });
 };

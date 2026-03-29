@@ -10,6 +10,7 @@ const {
   getSiteName,
   getScheduleTz,
   adminSecretConfigured,
+  getCronSecret,
   cronAuthorized,
 } = require('./lib/config');
 const { handleSchedule } = require('./lib/scheduleController');
@@ -68,6 +69,7 @@ const server = http.createServer(async (req, res) => {
       topic: getFixedTopic(),
       scheduleTz: getScheduleTz(),
       adminRequired: adminSecretConfigured(),
+      cronConfigured: !!getCronSecret(),
     });
     return;
   }

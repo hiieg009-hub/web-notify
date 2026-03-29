@@ -4,165 +4,294 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Notifications</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #0f1419;
-      --card: #1a2332;
-      --text: #e7ecf3;
-      --muted: #8b9cb3;
-      --accent: #537d90;
-      --accent-hover: #6a94a8;
-      --err: #e57373;
-      --ok: #81c784;
+      --glass-bg: rgba(255, 255, 255, 0.06);
+      --glass-border: rgba(255, 255, 255, 0.14);
+      --glass-highlight: rgba(255, 255, 255, 0.1);
+      --text: #f0f4fa;
+      --muted: rgba(230, 237, 247, 0.62);
+      --accent: #5eb8c9;
+      --accent-2: #7c9fd4;
+      --accent-glow: rgba(94, 184, 201, 0.35);
+      --err: #f2a4a4;
+      --ok: #8fd9a8;
+      --radius: 18px;
+      --radius-sm: 12px;
     }
-    * { box-sizing: border-box; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-tap-highlight-color: transparent; }
     body {
-      font-family: system-ui, Segoe UI, sans-serif;
-      background: var(--bg);
-      color: var(--text);
       margin: 0;
       min-height: 100vh;
-      padding: 1.5rem;
+      font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+      color: var(--text);
+      line-height: 1.45;
     }
-    .wrap { max-width: 480px; margin: 0 auto; }
-    h1 { font-size: 1.25rem; font-weight: 600; margin: 0 0 0.25rem; }
-    h2 { font-size: 1.05rem; font-weight: 600; margin: 2rem 0 0.75rem; color: var(--muted); }
-    .sub { color: var(--muted); font-size: 0.875rem; margin-bottom: 1.25rem; }
-    label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.35rem; }
+    .ambient {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse 100% 80% at 15% 10%, rgba(110, 80, 180, 0.35), transparent 50%),
+        radial-gradient(ellipse 80% 60% at 85% 20%, rgba(40, 120, 160, 0.3), transparent 45%),
+        radial-gradient(ellipse 70% 50% at 50% 95%, rgba(30, 90, 120, 0.25), transparent 40%),
+        linear-gradient(165deg, #070b14 0%, #0f1628 45%, #0a1220 100%);
+      pointer-events: none;
+    }
+    .ambient::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: 0.5;
+    }
+    .layout {
+      position: relative;
+      z-index: 1;
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 1.75rem 1.25rem 3rem;
+    }
+    .panel {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      padding: 1.35rem 1.35rem 1.5rem;
+      margin-bottom: 1.1rem;
+      box-shadow:
+        0 4px 24px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 var(--glass-highlight);
+    }
+    .panel--hero {
+      padding-top: 1.5rem;
+      text-align: center;
+    }
+    .panel--hero h1 {
+      margin: 0 0 0.35rem;
+      font-size: 1.45rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(120deg, #fff 0%, rgba(200, 220, 240, 0.92) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .panel--hero .sub {
+      margin: 0 0 1rem;
+      font-size: 0.88rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.4rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: rgba(0, 0, 0, 0.22);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text);
+    }
+    .chip span { color: var(--muted); font-weight: 500; }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--ok);
+      box-shadow: 0 0 8px var(--ok);
+    }
+    .status-dot.off { background: var(--muted); box-shadow: none; }
+    h2 {
+      margin: 0 0 1rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+    label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
     input, textarea, select {
       width: 100%;
-      padding: 0.65rem 0.75rem;
-      border-radius: 8px;
-      border: 1px solid #2d3a4d;
-      background: #121a26;
+      padding: 0.72rem 0.9rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.28);
       color: var(--text);
-      font-size: 1rem;
+      font-size: 0.95rem;
+      font-family: inherit;
       margin-bottom: 1rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
-    textarea { min-height: 72px; resize: vertical; }
+    input::placeholder, textarea::placeholder { color: rgba(230, 237, 247, 0.35); }
     input:focus, textarea:focus, select:focus {
       outline: none;
-      border-color: var(--accent);
+      border-color: rgba(94, 184, 201, 0.55);
+      box-shadow: 0 0 0 3px var(--accent-glow);
     }
-    button, .btn {
+    textarea { min-height: 80px; resize: vertical; }
+    button.primary {
       width: 100%;
-      padding: 0.65rem 0.75rem;
+      padding: 0.78rem 1rem;
       border: none;
-      border-radius: 8px;
-      background: var(--accent);
-      color: #fff;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
       font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: #061018;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+      box-shadow: 0 4px 20px var(--accent-glow);
+      margin-bottom: 0.35rem;
+      transition: transform 0.15s, filter 0.15s;
+    }
+    button.primary:hover { filter: brightness(1.06); transform: translateY(-1px); }
+    button.primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+    button.ghost, button.danger-ghost {
+      flex: 1;
+      padding: 0.5rem 0.65rem;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
-      margin-bottom: 0.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      margin: 0;
     }
-    button:hover, .btn:hover { background: var(--accent-hover); }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
-    button.secondary { background: #2d3a4d; }
-    button.secondary:hover { background: #3d4d64; }
-    button.danger { background: #6b3a3a; }
-    button.danger:hover { background: #804444; }
+    button.danger-ghost {
+      border-color: rgba(242, 164, 164, 0.35);
+      color: var(--err);
+      background: rgba(180, 60, 60, 0.12);
+    }
+    button.ghost:hover { background: rgba(255, 255, 255, 0.1); }
+    button.danger-ghost:hover { background: rgba(180, 60, 60, 0.2); }
     .out {
-      margin-top: 1rem;
-      padding: 1rem;
-      border-radius: 8px;
-      background: var(--card);
-      font-size: 0.85rem;
+      margin-top: 0.85rem;
+      padding: 0.9rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
       white-space: pre-wrap;
       word-break: break-word;
       min-height: 2.5rem;
-      border: 1px solid #2d3a4d;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
-    .out.err { color: var(--err); border-color: #5c3030; }
-    .out.ok { color: var(--ok); border-color: #2d4a32; }
-    .hint { font-size: 0.75rem; color: var(--muted); margin-top: -0.5rem; margin-bottom: 1rem; }
-    .topic-pill {
-      display: inline-block;
-      padding: 0.45rem 0.75rem;
-      border-radius: 8px;
-      background: #121a26;
-      border: 1px solid #2d3a4d;
-      font-size: 0.9rem;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      margin-bottom: 0.5rem;
-      user-select: all;
+    .out.err { color: var(--err); border-color: rgba(242, 164, 164, 0.25); }
+    .out.ok { color: var(--ok); border-color: rgba(143, 217, 168, 0.25); }
+    .hint { font-size: 0.72rem; color: var(--muted); margin: -0.35rem 0 1rem; line-height: 1.4; }
+    .panel code {
+      font-size: 0.8em;
+      padding: 0.12rem 0.35rem;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.08);
     }
-    .meta-row { font-size: 0.8rem; color: var(--muted); margin-bottom: 1rem; }
+    #adminWrap[hidden] { display: none !important; }
     .sched-item {
-      background: var(--card);
-      border: 1px solid #2d3a4d;
-      border-radius: 8px;
-      padding: 0.85rem;
+      padding: 1rem;
+      border-radius: var(--radius-sm);
       margin-bottom: 0.65rem;
-      font-size: 0.85rem;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.84rem;
     }
     .sched-item strong { color: var(--text); }
-    .sched-actions { display: flex; gap: 0.5rem; margin-top: 0.65rem; }
-    .sched-actions button { flex: 1; margin: 0; font-size: 0.8rem; padding: 0.45rem; }
-    hr.sep { border: none; border-top: 1px solid #2d3a4d; margin: 1.5rem 0; }
+    .sched-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+    .cron-hint {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 0.5rem;
+      padding: 0.5rem 0.65rem;
+      border-radius: var(--radius-sm);
+      background: rgba(0, 0, 0, 0.15);
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1 id="siteTitle">Notifications</h1>
-    <p class="sub" id="siteSub">Tuma arifa (FCM) na ratiba.</p>
-    <div class="meta-row">Topic: <span class="topic-pill" id="topicDisplay">—</span></div>
-    <div class="meta-row" id="tzRow" style="display:none;">Muda wa kila siku: <span id="tzDisplay"></span></div>
-
-    <label for="adminKey">Nenosiri la admin (ratiba)</label>
-    <input id="adminKey" type="password" placeholder="Weka ikiwa .env ina ADMIN_SECRET" autocomplete="off" />
-    <p class="hint">Inahifadhiwa kwenye kivinjari (session) tu. Ikiwa ADMIN_SECRET haitumiki, acha tupu.</p>
-
-    <hr class="sep" />
-
-    <h2>Tuma sasa</h2>
-    <form id="f">
-      <label for="title">Kichwa (title)</label>
-      <input id="title" name="title" type="text" placeholder="Hiari" autocomplete="off" />
-
-      <label for="body">Maelezo (body)</label>
-      <textarea id="body" name="body" placeholder="Hiari"></textarea>
-
-      <label for="image">Kiungo cha picha</label>
-      <input id="image" name="image" type="url" placeholder="https://..." autocomplete="off" />
-
-      <button type="submit" id="btn">Tuma</button>
-    </form>
-    <div id="out" class="out" aria-live="polite"></div>
-
-    <hr class="sep" />
-
-    <h2>Ratiba</h2>
-    <p class="hint" style="margin-top:0;">Mara moja au kila siku (saa kwa <span id="tzHint">TZ</span>).</p>
-
-    <form id="schedForm">
-      <label for="sTitle">Title</label>
-      <input id="sTitle" type="text" placeholder="Hiari" />
-      <label for="sBody">Body</label>
-      <textarea id="sBody" placeholder="Hiari"></textarea>
-      <label for="sImage">Picha URL</label>
-      <input id="sImage" type="url" placeholder="https://..." />
-
-      <label for="sMode">Aina</label>
-      <select id="sMode">
-        <option value="once">Mara moja (tarehe &amp; saa)</option>
-        <option value="daily">Kila siku (saa ile ile)</option>
-      </select>
-
-      <div id="onceFields">
-        <label for="sRunAt">Tarehe na saa</label>
-        <input id="sRunAt" type="datetime-local" />
+  <div class="ambient" aria-hidden="true"></div>
+  <div class="layout">
+    <header class="panel panel--hero">
+      <h1 id="siteTitle">Notifications</h1>
+      <p class="sub" id="siteSub">Arifa za FCM — tuma sasa au ratiba</p>
+      <div class="chips">
+        <div class="chip"><span>Topic</span> <strong id="topicDisplay">—</strong></div>
+        <div class="chip" id="tzChip" style="display:none;"><span>Muda</span> <strong id="tzDisplay"></strong></div>
+        <div class="chip" id="cronChip" style="display:none;"><span class="status-dot" id="cronDot"></span> Cron</div>
       </div>
-      <div id="dailyFields" style="display:none;">
-        <label for="sDailyTime">Saa (HH:mm)</label>
-        <input id="sDailyTime" type="time" />
-      </div>
+    </header>
 
-      <button type="submit" id="schedBtn">Ongeza ratiba</button>
-    </form>
-    <div id="schedOut" class="out" style="min-height:1rem;"></div>
-    <div id="schedList"></div>
+    <div id="adminWrap" class="panel" hidden>
+      <h2>Utawala wa ratiba</h2>
+      <p class="hint" style="margin-top:0;">Umeamilisha <code>ADMIN_SECRET</code> kwenye server. Weka hapa neno <strong>lile lile</strong> ulioloeka kwenye <code>.env</code>.</p>
+      <label for="adminKey">Nenosiri la admin</label>
+      <input id="adminKey" type="password" placeholder="Siri kutoka .env (ADMIN_SECRET)" autocomplete="off" />
+      <p class="hint">Inahifadhiwa kwenye kivinjari (session) tu hadi ufunge tab.</p>
+    </div>
+
+    <section class="panel">
+      <h2>Tuma sasa</h2>
+      <form id="f">
+        <label for="title">Kichwa</label>
+        <input id="title" type="text" placeholder="Hiari" autocomplete="off" />
+        <label for="body">Maelezo</label>
+        <textarea id="body" placeholder="Hiari"></textarea>
+        <label for="image">Kiungo cha picha</label>
+        <input id="image" type="url" placeholder="https://..." autocomplete="off" />
+        <button type="submit" class="primary" id="btn">Tuma sasa</button>
+      </form>
+      <div id="out" class="out" aria-live="polite"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Ratiba</h2>
+      <p class="hint" style="margin-top:0;">Mara moja au kila siku (saa kwa <span id="tzHint">TZ</span>).</p>
+      <p id="cronHint" class="cron-hint" style="display:none;"></p>
+
+      <form id="schedForm">
+        <label for="sTitle">Kichwa</label>
+        <input id="sTitle" type="text" placeholder="Hiari" />
+        <label for="sBody">Maelezo</label>
+        <textarea id="sBody" placeholder="Hiari"></textarea>
+        <label for="sImage">Picha URL</label>
+        <input id="sImage" type="url" placeholder="https://..." />
+        <label for="sMode">Aina</label>
+        <select id="sMode">
+          <option value="once">Mara moja</option>
+          <option value="daily">Kila siku</option>
+        </select>
+        <div id="onceFields">
+          <label for="sRunAt">Tarehe na saa</label>
+          <input id="sRunAt" type="datetime-local" />
+        </div>
+        <div id="dailyFields" style="display:none;">
+          <label for="sDailyTime">Saa</label>
+          <input id="sDailyTime" type="time" />
+        </div>
+        <button type="submit" class="primary" id="schedBtn">Ongeza ratiba</button>
+      </form>
+      <div id="schedOut" class="out" style="min-height:1rem;"></div>
+      <div id="schedList"></div>
+    </section>
   </div>
 
   <script>
@@ -171,6 +300,7 @@
     const btn = document.getElementById('btn');
     const schedOut = document.getElementById('schedOut');
     const schedList = document.getElementById('schedList');
+    const adminWrap = document.getElementById('adminWrap');
     const adminInput = document.getElementById('adminKey');
 
     adminInput.value = sessionStorage.getItem(ADMIN_KEY) || '';
@@ -193,7 +323,13 @@
         .replace(/"/g, '&quot;');
     }
 
-    let meta = { siteName: 'Notifications', topic: '', scheduleTz: 'UTC', adminRequired: false };
+    let meta = {
+      siteName: 'Notifications',
+      topic: '',
+      scheduleTz: 'UTC',
+      adminRequired: false,
+      cronConfigured: false,
+    };
 
     fetch('/api/meta')
       .then((r) => (r.ok ? r.json() : null))
@@ -204,9 +340,29 @@
         document.title = (j.siteName || 'Notifications') + ' — FCM';
         document.getElementById('topicDisplay').textContent = j.topic || '—';
         if (j.scheduleTz) {
-          document.getElementById('tzRow').style.display = 'block';
+          document.getElementById('tzChip').style.display = 'inline-flex';
           document.getElementById('tzDisplay').textContent = j.scheduleTz;
           document.getElementById('tzHint').textContent = j.scheduleTz;
+        }
+        if (j.adminRequired) {
+          adminWrap.removeAttribute('hidden');
+        } else {
+          adminWrap.setAttribute('hidden', '');
+        }
+        const cronChip = document.getElementById('cronChip');
+        const cronDot = document.getElementById('cronDot');
+        const cronHint = document.getElementById('cronHint');
+        cronChip.style.display = 'inline-flex';
+        const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+        if (j.cronConfigured) {
+          cronDot.classList.remove('off');
+          cronHint.style.display = 'none';
+        } else {
+          cronDot.classList.add('off');
+          cronHint.style.display = 'block';
+          cronHint.textContent = isLocal
+            ? 'PC: ratiba hutekelezwa kila dakika na server. Maelezo ya CRON / ADMIN: soma README.md kwenye repo.'
+            : 'Weka CRON_SECRET sawa .env na Vercel. Kiungo cha cron: https://<domain-yako>/api/cron — maelezo kamili README.md.';
         }
       })
       .catch(() => {});
@@ -297,10 +453,10 @@
               (it.lastSentAt ? ' · mwisho: ' + escapeHtml(it.lastSentAt) : '') +
               '</span>' +
               '<div class="sched-actions">' +
-              '<button type="button" class="secondary" data-act="toggle">' +
+              '<button type="button" class="ghost" data-act="toggle">' +
               (it.enabled ? 'Zima' : 'Washa') +
               '</button>' +
-              '<button type="button" class="danger" data-act="delete">Futa</button></div>';
+              '<button type="button" class="danger-ghost" data-act="delete">Futa</button></div>';
             schedList.appendChild(el);
           });
         schedList.querySelectorAll('button[data-act]').forEach((b) => {
@@ -313,15 +469,14 @@
     }
 
     async function onSchedAction(ev) {
-      const btn = ev.currentTarget;
-      const row = btn.closest('.sched-item');
+      const btnEl = ev.currentTarget;
+      const row = btnEl.closest('.sched-item');
       if (!row) return;
       const id = row.dataset.id;
-      const act = btn.getAttribute('data-act');
+      const act = btnEl.getAttribute('data-act');
       let body;
-      if (act === 'delete') {
-        body = { action: 'delete', id };
-      } else if (act === 'toggle') {
+      if (act === 'delete') body = { action: 'delete', id };
+      else if (act === 'toggle') {
         const cur = row.dataset.enabled === '1';
         body = { action: 'setEnabled', id, enabled: !cur };
       } else return;
