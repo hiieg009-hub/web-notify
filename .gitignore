@@ -26,6 +26,9 @@ google-services.json
 *.p12
 *.key
 
+# Ratiba — JSON ya ndani (hifadhi ya pekee)
+data/*.json
+
 # OS
 .DS_Store
 Thumbs.db

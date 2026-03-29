@@ -6,14 +6,23 @@ require('dotenv').config({ path: path.join(__dirname, '.env.local') });
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const { sendFcmFromBody, getFixedTopic } = require('./lib/fcmSend');
+const {
+  getSiteName,
+  getScheduleTz,
+  adminSecretConfigured,
+  cronAuthorized,
+} = require('./lib/config');
+const { handleSchedule } = require('./lib/scheduleController');
+const { processDueSchedules } = require('./lib/scheduleEngine');
 
 const PORT = Number(process.env.PORT) || 3000;
 const publicDir = path.join(__dirname, 'public');
 
-const cors = {
+const corsApi = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers':
+    'Content-Type, x-admin-secret, Authorization',
 };
 
 function contentType(filePath) {
@@ -35,18 +44,65 @@ function readBody(req) {
   });
 }
 
+function writeJson(res, status, obj, extraHeaders = {}) {
+  res.writeHead(status, {
+    ...corsApi,
+    'Content-Type': 'application/json; charset=utf-8',
+    ...extraHeaders,
+  });
+  res.end(JSON.stringify(obj));
+}
+
 const server = http.createServer(async (req, res) => {
   const urlPath = (req.url || '/').split('?')[0];
 
-  if (req.method === 'OPTIONS' && (urlPath === '/api/send' || urlPath === '/api/meta')) {
-    res.writeHead(204, cors);
+  if (req.method === 'OPTIONS' && urlPath.startsWith('/api/')) {
+    res.writeHead(204, corsApi);
     res.end();
     return;
   }
 
   if (req.method === 'GET' && urlPath === '/api/meta') {
-    res.writeHead(200, { ...cors, 'Content-Type': 'application/json; charset=utf-8' });
-    res.end(JSON.stringify({ topic: getFixedTopic() }));
+    writeJson(res, 200, {
+      siteName: getSiteName(),
+      topic: getFixedTopic(),
+      scheduleTz: getScheduleTz(),
+      adminRequired: adminSecretConfigured(),
+    });
+    return;
+  }
+
+  if (urlPath === '/api/schedule') {
+    let bodyRaw = '';
+    if (req.method === 'POST') {
+      try {
+        bodyRaw = await readBody(req);
+      } catch (e) {
+        writeJson(res, 400, { error: String(e.message || e) });
+        return;
+      }
+    }
+    const result = await handleSchedule(req.method, req.headers, bodyRaw);
+    if (result.status === 204) {
+      res.writeHead(204, corsApi);
+      res.end();
+      return;
+    }
+    writeJson(res, result.status, result.json);
+    return;
+  }
+
+  if (urlPath === '/api/cron' && (req.method === 'GET' || req.method === 'POST')) {
+    if (!cronAuthorized(req.headers)) {
+      writeJson(res, 401, { error: 'Cron si halali (Bearer CRON_SECRET).' });
+      return;
+    }
+    try {
+      const out = await processDueSchedules();
+      writeJson(res, 200, { ok: true, ...out });
+    } catch (e) {
+      writeJson(res, 500, { error: e.message || String(e) });
+    }
     return;
   }
 
@@ -55,32 +111,34 @@ const server = http.createServer(async (req, res) => {
     try {
       raw = await readBody(req);
     } catch (e) {
-      res.writeHead(400, { ...cors, 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: String(e.message || e) }));
+      writeJson(res, 400, { error: String(e.message || e) });
       return;
     }
     let parsed = {};
     try {
       parsed = raw ? JSON.parse(raw) : {};
     } catch {
-      res.writeHead(400, { ...cors, 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'JSON si halali' }));
+      writeJson(res, 400, { error: 'JSON si halali' });
       return;
     }
 
     const result = await sendFcmFromBody(parsed);
     if (!result.ok) {
-      res.writeHead(result.status, { ...cors, 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: result.error }));
+      writeJson(res, result.status, { error: result.error });
       return;
     }
-    res.writeHead(200, { ...cors, 'Content-Type': 'application/json; charset=utf-8' });
+    res.writeHead(200, {
+      ...corsApi,
+      'Content-Type': 'application/json; charset=utf-8',
+    });
     res.end(result.body);
     return;
   }
 
   const rel =
-    urlPath === '/' ? 'index.html' : path.normalize(urlPath.replace(/^\//, '')).replace(/^(\.\.(\/|\\|$))+/, '');
+    urlPath === '/'
+      ? 'index.html'
+      : path.normalize(urlPath.replace(/^\//, '')).replace(/^(\.\.(\/|\\|$))+/, '');
   const safeRoot = path.resolve(publicDir);
   const filePath = path.resolve(safeRoot, rel);
   if (filePath !== safeRoot && !filePath.startsWith(safeRoot + path.sep)) {
@@ -98,6 +156,12 @@ const server = http.createServer(async (req, res) => {
     res.end(data);
   });
 });
+
+setInterval(() => {
+  processDueSchedules().catch((err) =>
+    console.error('[schedule]', err && err.message ? err.message : err)
+  );
+}, 60 * 1000);
 
 server.listen(PORT, () => {
   console.log(`Local: http://localhost:${PORT}`);

@@ -6,6 +6,7 @@ try {
 } catch (_) {}
 
 const { getFixedTopic } = require('../lib/fcmSend');
+const { getSiteName, getScheduleTz, adminSecretConfigured } = require('../lib/config');
 
 module.exports = (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -20,5 +21,10 @@ module.exports = (req, res) => {
     res.status(405).json({ error: 'Tumia GET' });
     return;
   }
-  res.status(200).json({ topic: getFixedTopic() });
+  res.status(200).json({
+    siteName: getSiteName(),
+    topic: getFixedTopic(),
+    scheduleTz: getScheduleTz(),
+    adminRequired: adminSecretConfigured(),
+  });
 };

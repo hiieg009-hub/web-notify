@@ -1,77 +1,101 @@
 # web-notify
 
-Tovuti ndogo ya kutuma arifa kupitia **Firebase Cloud Messaging (HTTP v1)** — inalingana na ule muundo wa `data` (`title`, `body`, `image`) ulio kwenye app ya Android ya Betmakini.
+Tovuti ndogo ya kutuma arifa kupitia **Firebase Cloud Messaging (HTTP v1)** — `data`: `title`, `body`, `image`. Ina **tuma sasa** na **ratiba** (mara moja au kila siku), hifadhi **JSON** ya ndani.
 
 **GitHub:** [https://github.com/basanzietech/web-notify](https://github.com/basanzietech/web-notify)
 
 ---
 
+## Mazingira (`.env` / Vercel)
+
+Badilisha tu `.env` kwa kila mradi (jina, topic, siri):
+
+| Variable | Maana |
+|----------|--------|
+| `SITE_NAME` | Jina linaonekana kwenye kichwa cha ukurasa |
+| `FCM_TOPIC` | Topic thabiti ya FCM (mfano `BETMAKINI`) |
+| `SCHEDULE_TZ` | Kanda ya wakati kwa ratiba ya kila siku (mfano `Africa/Nairobi`) |
+| `SCHEDULE_DB_PATH` | (Chaguo) njia ya faili ya JSON; chaguo-msingi `data/schedules.json` |
+| `ADMIN_SECRET` | Siri ya kuongeza/futa ratiba kwenye API; ikiwa tupu, API ya ratiba **wazi** |
+| `CRON_SECRET` | Siri ya `/api/cron` (Vercel Cron inatumia Bearer hii) |
+| `FIREBASE_SERVICE_ACCOUNT_JSON` au `GOOGLE_APPLICATION_CREDENTIALS` | Firebase service account |
+
+Nakili `.env.example` → `.env.local` na ujaze thamani halisi.
+
+---
+
 ## Usalama na repo ya kibinafsi
 
-- Weka repo **Private** kwenye GitHub ili mtu asiye na ruhusa asiweze kuona code wala issues.
-- **Usiwahi** ku-commit: `service-account.json`, `.env`, `.env.local`, funguo za PEM, au `google-services.json`. Faili hizi ziko kwenye `.gitignore`.
-- Siri za production (JSON ya service account) ziweke tu kwenye **Environment Variables** ya Vercel (au host yako), si ndani ya faili zinazosawiriwa Git.
-- **Topic** ya FCM ni **thabiti upande wa server**: thamani ni `FCM_TOPIC` (chaguo-msingi `BETMAKINI`). Hata mtu akijaribu kutuma `topic` tofauti kwenye API, server haitumii — hivyo data yako ya ujumbe haiendi topic isiyoidhinishwa.
+- Repo **Private** kwenye GitHub.
+- **Usicommit:** `service-account.json`, `.env*`, `data/*.json` ya ratiba, `google-services.json`, funguo.
+- Topic na jina la tovuti zinatoka **server** (`FCM_TOPIC`, `SITE_NAME`); mteja hawezi kubadilisha topic kwa njia ya siri.
 
 ---
 
 ## Mahitaji
 
-- Node.js 18+ (kwa `fetch` ndani ya server)
-- Akaunti ya Firebase na **Service Account** yenye ruhusa za kutumia FCM v1
+- Node.js 18+
+- Firebase **Service Account** na FCM v1
 
 ---
 
-## Local (PC yako)
+## Local
 
 ```bash
 cd web-notify
 npm install
 cp .env.example .env.local
-# Hariri .env.local: weka GOOGLE_APPLICATION_CREDENTIALS au FIREBASE_SERVICE_ACCOUNT_JSON
+# Hariri .env.local
 npm run dev
 ```
 
-Fungua: `http://localhost:3000`
+Fungua `http://localhost:3000`. Server inaangalia ratiba **kila dakika** moja kwa moja.
 
 ---
 
-## Deploy (Vercel)
+## Ratiba na JSON
 
-1. Import repo kutoka [GitHub](https://github.com/basanzietech/web-notify).
-2. Kwenye **Settings → Environment Variables** weka:
-   - `FIREBASE_SERVICE_ACCOUNT_JSON` — mstari mmoja wa JSON kamili ya service account **au**
-   - `GOOGLE_APPLICATION_CREDENTIALS` haifanyi kazi vizuri Vercel bila faili; bora JSON kwenye variable hiyo.
-3. (Chaguo) `FCM_TOPIC=BETMAKINI` ikiwa unataka kubadilisha baadaye bila kubadilisha code.
+- Faili: chaguo-msingi `data/schedules.json` (haijacommitwi).
+- **Mara moja:** `runAt` (ISO).
+- **Kila siku:** saa `HH:mm` kwa `SCHEDULE_TZ`.
+- UI inahitaji `ADMIN_SECRET` ukiwa umeuweka kwenye `.env` (weka kwenye fomu — inahifadhiwa session).
+
+### Vercel / serverless
+
+Diski ya Vercel **haina kudumu** kwa kuandika faili: ratiba zinaweza **kupotea** baada ya deploy au kati ya invocations. Kwa production kwenye Vercel, tafadhali tumia **hifadhi ya nje** (KV, Postgres, n.k.) au host Node yenye diski (VPS). `npm run dev` na VPS zinafanya kazi na JSON ya kawaida.
+
+### Cron ya Vercel
+
+`vercel.json` ina cron kila **dakika 5** inayopiga `/api/cron`. Weka `CRON_SECRET` kwenye Environment Variables ya Vercel; Vercel inatuma `Authorization: Bearer <CRON_SECRET>` wakati wa cron.
+
+Unaweza pia kupiga mkono: `curl -H "Authorization: Bearer JINSI_YA_CRON_SECRET" https://your-app.vercel.app/api/cron`
 
 ---
 
-## Scheduli (cron) — je, inawezekana?
+## API fupi
 
-**Ndiyo.** Hii project kwa sasa inatumia tu “tuma sasa” kutoka fomu. Ili **ratiba** (kila siku, kila saa, n.k.) unaweza:
-
-| Njia | Maelezo mafupi |
-|------|----------------|
-| **Vercel Cron** | Ongeza `vercel.json` na route ya cron inayopiga endpoint yako (kwa usalama tumia siri ya header kama `CRON_SECRET`). |
-| **GitHub Actions** | Workflow yenye `schedule:` inayoituma `curl` POST kwenye URL yako ya production pamoja na token/siri. |
-| **Google Cloud Scheduler** | Inaweza kumshika **Cloud Function** au URL ya nje inayoituma ombi la kutuma FCM. |
-| **Huduma za nje** | Mfano cron-job.org / EasyCron zinazopiga API yako kwa muda ulioweka. |
-
-Ili scheduli iwe salama, usifunue endpoint bila **uhakiki** (mfano header siri au Vercel cron verification). Ukitaka, tunaweza baadaye kuongeza `api/cron.js` maalum yenye `CRON_SECRET`.
+| Njia | Kazi |
+|------|------|
+| `GET /api/meta` | `siteName`, `topic`, `scheduleTz`, `adminRequired` |
+| `POST /api/send` | Tuma sasa (`title`, `body`, `image`) |
+| `GET/POST /api/schedule` | Orodha (GET); ongeza/futa/washa (POST + `x-admin-secret`) |
+| `GET/POST /api/cron` | Tekeleza ratiba zilizofika (Bearer `CRON_SECRET`) |
 
 ---
 
 ## Muundo wa mradi
 
-| Njia | Faili |
-|------|--------|
+| Sehemu | Faili |
+|--------|--------|
 | UI | `public/index.html` |
-| API (Vercel) | `api/send.js`, `api/meta.js` (onyesha topic thabiti) |
-| Logic ya FCM | `lib/fcmSend.js` |
-| Local server | `server-local.js` |
+| API | `api/send.js`, `api/meta.js`, `api/schedule.js`, `api/cron.js` |
+| FCM | `lib/fcmSend.js` |
+| Ratiba | `lib/scheduleStore.js`, `lib/scheduleEngine.js`, `lib/scheduleController.js` |
+| Config | `lib/config.js` |
+| Local | `server-local.js` |
 
 ---
 
 ## Leseni
 
-Code ya mradi wako; tumia kulingana na sera yako ya ndani / ya kampuni.
+Code ya mradi wako; tumia kulingana na sera yako.
