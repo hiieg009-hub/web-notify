@@ -334,6 +334,12 @@
     function persistAdminKey() {
       sessionStorage.setItem(ADMIN_KEY, adminInput.value.trim());
       updateAuthGates();
+      if (sendScheduleAllowed()) loadSchedules();
+      else {
+        schedList.innerHTML = '';
+        schedOut.textContent = '';
+        schedOut.className = 'out';
+      }
     }
     adminInput.addEventListener('change', persistAdminKey);
     adminInput.addEventListener('input', persistAdminKey);
@@ -433,9 +439,11 @@
             : 'Weka CRON_SECRET sawa .env na Vercel. Kiungo cha cron: https://<domain-yako>/api/cron — maelezo kamili README.md.';
         }
         updateAuthGates();
+        if (sendScheduleAllowed()) loadSchedules();
       })
       .catch(() => {
         updateAuthGates();
+        if (sendScheduleAllowed()) loadSchedules();
       });
 
     document.getElementById('clearAdminKey').addEventListener('click', () => {
@@ -640,7 +648,6 @@
       }
     });
 
-    loadSchedules();
     updateAuthGates();
   </script>
 </body>

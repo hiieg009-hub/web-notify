@@ -39,10 +39,19 @@ module.exports = async (req, res) => {
     }
   }
 
-  const result = await handleSchedule(req.method, req.headers, bodyRaw);
-  if (result.status === 204) {
-    res.status(204).end();
-    return;
+  try {
+    const result = await handleSchedule(req.method, req.headers, bodyRaw);
+    if (result.status === 204) {
+      res.status(204).end();
+      return;
+    }
+    res.status(result.status).json(result.json);
+  } catch (e) {
+    res.status(500).json({
+      error:
+        (e && e.message) ||
+        String(e) ||
+        'Hitilafu ya ndani (hifadhi ya ratiba / seva).',
+    });
   }
-  res.status(result.status).json(result.json);
 };
