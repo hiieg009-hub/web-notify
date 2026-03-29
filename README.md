@@ -1,4 +1,4 @@
-# web-notify  fcm services by benjamin omary.
+# web-notify  fcm services by benjamin omary
 
 Tovuti ndogo ya kutuma arifa kupitia **Firebase Cloud Messaging (HTTP v1)** — `data`: `title`, `body`, `image`. Ina **tuma sasa** na **ratiba** (mara moja au kila siku), hifadhi **JSON** ya ndani.
 
