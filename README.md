@@ -165,4 +165,4 @@ Diski ya Vercel **haina kudumu** kwa kuandika faili: ratiba zinaweza **kupotea**
 
 ## Leseni
 
-Code ya mradi wako; tumia kulingana na sera yako.
+Code ya mradi wako; tumia kulingana na sera yako. by swaxnet team
