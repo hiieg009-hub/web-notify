@@ -135,7 +135,7 @@ Diski ya Vercel **haina kudumu** kwa kuandika faili: ratiba zinaweza **kupotea**
 
 ### Cron ya Vercel
 
-`vercel.json` ina cron **mara moja kwa siku** (`0 6 * * *` = saa 6:00 **UTC**) inayolenga **`/api/cron`**. Hii inalingana na mipaka ya **Vercel Hobby** (cron si zaidi ya mara moja kwa siku). Kwa mara nyingi kwa siku unahitaji **Pro** au huduma ya nje (cron-job.org) inayopiga URL yako. Weka `CRON_SECRET` kwenye Environment Variables. URL: **`https://<domain-yako>/api/cron`**.
+`vercel.json` ina cron **`*/5 * * * *`** (kila **dakika 5**) inayolenga **`/api/cron`**. Hii inafanya kazi kwenye **Vercel Pro** (na miradi inayoruhusu). Kwenye **Vercel Hobby**, Vercel **haitaruhusu** mzunguko wa zaidi ya mara moja kwa siku — utaona kosa wakati wa deploy; badilisha kwenda `0 6 * * *` au **panda Pro**, au tumia **cron-job.org** / nyingine kupiga `/api/cron` kila dakika 5. Weka `CRON_SECRET` kwenye Environment Variables. URL: **`https://<domain-yako>/api/cron`**.
 
 ---
 
