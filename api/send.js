@@ -57,5 +57,6 @@ module.exports = async (req, res) => {
     res.status(result.status).json({ error: result.error });
     return;
   }
-  res.status(200).type('json').send(result.body);
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.status(200).send(result.body);
 };
