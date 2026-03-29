@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Betmakini — Tuma notification</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --card: #1a2332;
+      --text: #e7ecf3;
+      --muted: #8b9cb3;
+      --accent: #537d90;
+      --accent-hover: #6a94a8;
+      --err: #e57373;
+      --ok: #81c784;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, Segoe UI, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      min-height: 100vh;
+      padding: 1.5rem;
+    }
+    .wrap { max-width: 420px; margin: 0 auto; }
+    h1 { font-size: 1.25rem; font-weight: 600; margin: 0 0 0.25rem; }
+    .sub { color: var(--muted); font-size: 0.875rem; margin-bottom: 1.5rem; }
+    label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.35rem; }
+    input, textarea {
+      width: 100%;
+      padding: 0.65rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid #2d3a4d;
+      background: #121a26;
+      color: var(--text);
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    textarea { min-height: 88px; resize: vertical; }
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    button {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover { background: var(--accent-hover); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .out {
+      margin-top: 1.25rem;
+      padding: 1rem;
+      border-radius: 8px;
+      background: var(--card);
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 3rem;
+      border: 1px solid #2d3a4d;
+    }
+    .out.err { color: var(--err); border-color: #5c3030; }
+    .out.ok { color: var(--ok); border-color: #2d4a32; }
+    .hint { font-size: 0.75rem; color: var(--muted); margin-top: -0.5rem; margin-bottom: 1rem; }
+    .topic-pill {
+      display: inline-block;
+      padding: 0.45rem 0.75rem;
+      border-radius: 8px;
+      background: #121a26;
+      border: 1px solid #2d3a4d;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      margin-bottom: 1.25rem;
+      user-select: all;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Tuma notification (FCM)</h1>
+    <p class="sub">Sehemu za chini ni hiari — ujumbe huenda kwa topic iliyowekwa kwenye server (haiwezi kubadilishwa hapa).</p>
+
+    <p class="hint" style="margin-bottom: 0.35rem;">Topic (thabiti)</p>
+    <div class="topic-pill" id="topicDisplay" aria-label="Topic thabiti">BETMAKINI</div>
+
+    <form id="f">
+      <label for="title">Kichwa (title)</label>
+      <input id="title" name="title" type="text" placeholder="Hiari" autocomplete="off" />
+
+      <label for="body">Maelezo (body)</label>
+      <textarea id="body" name="body" placeholder="Hiari"></textarea>
+
+      <label for="image">Kiungo cha picha (image URL)</label>
+      <input id="image" name="image" type="url" placeholder="https://..." autocomplete="off" />
+
+      <button type="submit" id="btn">Tuma</button>
+    </form>
+
+    <div id="out" class="out" aria-live="polite"></div>
+  </div>
+
+  <script>
+    const out = document.getElementById('out');
+    const btn = document.getElementById('btn');
+    const topicDisplay = document.getElementById('topicDisplay');
+
+    fetch('/api/meta')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (j && j.topic) topicDisplay.textContent = j.topic;
+      })
+      .catch(() => {});
+
+    document.getElementById('f').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      out.textContent = '';
+      out.className = 'out';
+      btn.disabled = true;
+
+      const title = document.getElementById('title').value.trim();
+      const body = document.getElementById('body').value.trim();
+      const image = document.getElementById('image').value.trim();
+
+      try {
+        const res = await fetch('/api/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, body, image }),
+        });
+        const text = await res.text();
+        let msg = text;
+        try {
+          const j = JSON.parse(text);
+          msg = j.error || j.message || JSON.stringify(j, null, 2);
+        } catch (_) {}
+        if (res.ok) {
+          out.className = 'out ok';
+          out.textContent = 'Imefanikiwa:\n' + msg;
+        } else {
+          out.className = 'out err';
+          out.textContent = 'Hitilafu (' + res.status + '):\n' + msg;
+        }
+      } catch (err) {
+        out.className = 'out err';
+        out.textContent = 'Mtandao: ' + (err && err.message ? err.message : String(err));
+      }
+      btn.disabled = false;
+    });
+  </script>
+</body>
+</html>

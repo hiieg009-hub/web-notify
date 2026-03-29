@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Siri / mazingira — KAMWE usicommit
+.env
+.env.*
+!.env.example
+.env.local
+*.local
+
+# Vercel
+.vercel
+
+# Logi
+*.log
+npm-debug.log*
+
+# Firebase / Google — funguo na faili za ndani ya app
+service-account.json
+*-service-account*.json
+google-services.json
+**/google-services.json
+
+# Funguo nyingine
+*.pem
+*.p12
+*.key
+
+# OS
+.DS_Store
+Thumbs.db

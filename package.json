@@ -1,0 +1,14 @@
+{
+  "name": "betmakini-fcm-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Simple web UI to send FCM notifications (HTTP v1)",
+  "scripts": {
+    "dev": "node server-local.js",
+    "dev:vercel": "vercel dev"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "google-auth-library": "^9.14.0"
+  }
+}
