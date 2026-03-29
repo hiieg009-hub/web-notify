@@ -225,6 +225,11 @@
       border-radius: var(--radius-sm);
       background: rgba(0, 0, 0, 0.15);
     }
+    .panel--warn {
+      border-color: rgba(242, 164, 164, 0.45);
+      background: rgba(120, 40, 40, 0.15);
+    }
+    .panel--warn h2 { color: var(--err); }
   </style>
 </head>
 <body>
@@ -237,19 +242,37 @@
         <div class="chip"><span>Topic</span> <strong id="topicDisplay">—</strong></div>
         <div class="chip" id="tzChip" style="display:none;"><span>Muda</span> <strong id="tzDisplay"></strong></div>
         <div class="chip" id="cronChip" style="display:none;"><span class="status-dot" id="cronDot"></span> Cron</div>
+        <div class="chip" id="devOpenChip" style="display:none;"><span>API</span> <strong>wazi (dev)</strong></div>
       </div>
     </header>
 
+    <div id="serverMisconfig" class="panel panel--warn" style="display:none;">
+      <h2>Seva haijasanidiwa</h2>
+      <p class="hint" style="margin-top:0;color:var(--text);">
+        Hakuna <code>ADMIN_SECRET</code> kwenye mazingira ya server. Ongeza kwenye <code>.env.local</code> kisha anzisha upya <code>npm run dev</code>.
+        Kwa jaribio bila nenosiri (ndani tu): weka <code>ADMIN_AUTH_OPEN=1</code> — <strong>usitumie production</strong>.
+      </p>
+    </div>
+
     <div id="adminWrap" class="panel" hidden>
-      <h2>Utawala wa ratiba</h2>
-      <p class="hint" style="margin-top:0;">Umeamilisha <code>ADMIN_SECRET</code> kwenye server. Weka hapa neno <strong>lile lile</strong> ulioloeka kwenye <code>.env</code>.</p>
+      <h2>Ingia (admin)</h2>
+      <p class="hint" style="margin-top:0;">
+        Server inatumia <code>ADMIN_SECRET</code> kwenye <code>.env</code>. Weka hapa nenosiri <strong>lile lile</strong> ili
+        <strong>kutuma arifa sasa</strong> na <strong>kudhibiti ratiba</strong>. Hii siyo akaunti ya Google — ni neno ulijiseti wewe mwenyeji wa server.
+      </p>
       <label for="adminKey">Nenosiri la admin</label>
-      <input id="adminKey" type="password" placeholder="Siri kutoka .env (ADMIN_SECRET)" autocomplete="off" />
-      <p class="hint">Inahifadhiwa kwenye kivinjari (session) tu hadi ufunge tab.</p>
+      <input id="adminKey" type="password" placeholder="Siri sawa na ADMIN_SECRET kwenye .env" autocomplete="current-password" />
+      <p class="hint">Inahifadhiwa kwenye kivinjari (sessionStorage) tu kwa tab hii.</p>
+      <button type="button" class="ghost" id="clearAdminKey" style="width:100%;margin-top:0.25rem;">
+        Ondoa nenosiri kwenye kivinjari (session)
+      </button>
     </div>
 
     <section class="panel">
       <h2>Tuma sasa</h2>
+      <p id="sendGateHint" class="hint" style="display:none;margin-top:0;">
+        Weka nenosiri la admin hapo juu kabla ya kutuma. Kivinjari kinaweza kuikumbuka katika tab hii (sessionStorage).
+      </p>
       <form id="f">
         <label for="title">Kichwa</label>
         <input id="title" type="text" placeholder="Hiari" autocomplete="off" />
@@ -264,7 +287,10 @@
 
     <section class="panel">
       <h2>Ratiba</h2>
-      <p class="hint" style="margin-top:0;">Mara moja au kila siku (saa kwa <span id="tzHint">TZ</span>).</p>
+      <p class="hint" style="margin-top:0;">
+        Mara moja au kila siku (saa kwa <span id="tzHint">TZ</span>).
+        <strong>Ratiba</strong> inatekelezwa na server kila dakika — sio kitufe cha &quot;Tuma sasa&quot;.
+      </p>
       <p id="cronHint" class="cron-hint" style="display:none;"></p>
 
       <form id="schedForm">
@@ -302,11 +328,36 @@
     const schedList = document.getElementById('schedList');
     const adminWrap = document.getElementById('adminWrap');
     const adminInput = document.getElementById('adminKey');
+    const schedBtn = document.getElementById('schedBtn');
 
     adminInput.value = sessionStorage.getItem(ADMIN_KEY) || '';
-    adminInput.addEventListener('change', () => {
+    function persistAdminKey() {
       sessionStorage.setItem(ADMIN_KEY, adminInput.value.trim());
-    });
+      updateAuthGates();
+    }
+    adminInput.addEventListener('change', persistAdminKey);
+    adminInput.addEventListener('input', persistAdminKey);
+
+    function hasAdminKey() {
+      return (adminInput.value || sessionStorage.getItem(ADMIN_KEY) || '').trim().length > 0;
+    }
+
+    /** Tuma / ratiba vinaweza kutumika kwenye kivinjari */
+    function sendScheduleAllowed() {
+      if (!meta || meta.adminAuthOpen) return true;
+      if (meta.adminSecretMissing) return false;
+      return hasAdminKey();
+    }
+
+    function needsBrowserAdmin() {
+      return meta && !meta.adminAuthOpen && !meta.adminSecretMissing;
+    }
+
+    function updateAuthGates() {
+      const ok = sendScheduleAllowed();
+      btn.disabled = !ok;
+      schedBtn.disabled = !ok;
+    }
 
     function adminHeaders() {
       const h = { 'Content-Type': 'application/json' };
@@ -327,7 +378,9 @@
       siteName: 'Notifications',
       topic: '',
       scheduleTz: 'UTC',
-      adminRequired: false,
+      adminAuthOpen: false,
+      adminRequired: true,
+      adminSecretMissing: false,
       cronConfigured: false,
     };
 
@@ -344,10 +397,25 @@
           document.getElementById('tzDisplay').textContent = j.scheduleTz;
           document.getElementById('tzHint').textContent = j.scheduleTz;
         }
-        if (j.adminRequired) {
-          adminWrap.removeAttribute('hidden');
-        } else {
+        const sendGate = document.getElementById('sendGateHint');
+        const mis = document.getElementById('serverMisconfig');
+        const devChip = document.getElementById('devOpenChip');
+        if (j.adminAuthOpen) {
+          devChip.style.display = 'inline-flex';
+          mis.style.display = 'none';
           adminWrap.setAttribute('hidden', '');
+          sendGate.style.display = 'none';
+        } else {
+          devChip.style.display = 'none';
+          if (j.adminSecretMissing) {
+            mis.style.display = 'block';
+            adminWrap.setAttribute('hidden', '');
+            sendGate.style.display = 'none';
+          } else {
+            mis.style.display = 'none';
+            adminWrap.removeAttribute('hidden');
+            sendGate.style.display = 'block';
+          }
         }
         const cronChip = document.getElementById('cronChip');
         const cronDot = document.getElementById('cronDot');
@@ -364,8 +432,17 @@
             ? 'PC: ratiba hutekelezwa kila dakika na server. Maelezo ya CRON / ADMIN: soma README.md kwenye repo.'
             : 'Weka CRON_SECRET sawa .env na Vercel. Kiungo cha cron: https://<domain-yako>/api/cron — maelezo kamili README.md.';
         }
+        updateAuthGates();
       })
-      .catch(() => {});
+      .catch(() => {
+        updateAuthGates();
+      });
+
+    document.getElementById('clearAdminKey').addEventListener('click', () => {
+      sessionStorage.removeItem(ADMIN_KEY);
+      adminInput.value = '';
+      updateAuthGates();
+    });
 
     document.getElementById('sMode').addEventListener('change', () => {
       const once = document.getElementById('sMode').value === 'once';
@@ -375,6 +452,13 @@
 
     document.getElementById('f').addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!sendScheduleAllowed()) {
+        out.className = 'out err';
+        out.textContent = meta.adminSecretMissing
+          ? 'Seva haina ADMIN_SECRET — weka kwenye .env.local kisha anzisha upya server.'
+          : 'Weka kwanza nenosiri la admin hapo juu.';
+        return;
+      }
       out.textContent = '';
       out.className = 'out';
       btn.disabled = true;
@@ -384,7 +468,7 @@
       try {
         const res = await fetch('/api/send', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: adminHeaders(),
           body: JSON.stringify({ title, body, image }),
         });
         const text = await res.text();
@@ -501,6 +585,13 @@
 
     document.getElementById('schedForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!sendScheduleAllowed()) {
+        schedOut.className = 'out err';
+        schedOut.textContent = meta.adminSecretMissing
+          ? 'Seva haina ADMIN_SECRET — weka kwenye .env.local kisha anzisha upya server.'
+          : 'Weka kwanza nenosiri la admin hapo juu.';
+        return;
+      }
       schedOut.textContent = '';
       schedOut.className = 'out';
       const mode = document.getElementById('sMode').value;
@@ -550,6 +641,7 @@
     });
 
     loadSchedules();
+    updateAuthGates();
   </script>
 </body>
 </html>

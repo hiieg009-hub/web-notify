@@ -9,7 +9,8 @@ const { getFixedTopic } = require('../lib/fcmSend');
 const {
   getSiteName,
   getScheduleTz,
-  adminSecretConfigured,
+  isAdminAuthOpen,
+  adminSetupError,
   getCronSecret,
 } = require('../lib/config');
 
@@ -30,7 +31,9 @@ module.exports = (req, res) => {
     siteName: getSiteName(),
     topic: getFixedTopic(),
     scheduleTz: getScheduleTz(),
-    adminRequired: adminSecretConfigured(),
+    adminAuthOpen: isAdminAuthOpen(),
+    adminRequired: !isAdminAuthOpen(),
+    adminSecretMissing: adminSetupError(),
     cronConfigured: !!getCronSecret(),
   });
 };

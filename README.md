@@ -16,7 +16,8 @@ Badilisha tu `.env` kwa kila mradi (jina, topic, siri):
 | `FCM_TOPIC` | Topic thabiti ya FCM (mfano `BETMAKINI`) |
 | `SCHEDULE_TZ` | Kanda ya wakati kwa ratiba ya kila siku (mfano `Africa/Nairobi`) |
 | `SCHEDULE_DB_PATH` | (Chaguo) njia ya faili ya JSON; chaguo-msingi `data/schedules.json` |
-| `ADMIN_SECRET` | Siri ya kuongeza/futa ratiba kwenye API; ikiwa tupu, API ya ratiba **wazi** |
+| `ADMIN_SECRET` | **Lazima** (isipokuwa `ADMIN_AUTH_OPEN=1`). Linazuia **kutuma** na **ratiba** bila `x-admin-secret` / Bearer |
+| `ADMIN_AUTH_OPEN` | Weka `1` au `true` **dev tu** — API wazi bila `ADMIN_SECRET` (usitumie production) |
 | `CRON_SECRET` | Siri ya `/api/cron` (Vercel Cron inatumia Bearer hii) |
 | `FIREBASE_SERVICE_ACCOUNT_JSON` au `GOOGLE_APPLICATION_CREDENTIALS` | Firebase service account |
 
@@ -29,9 +30,11 @@ Nakili `.env.example` → `.env.local` na ujaze thamani halisi.
 ### ADMIN_SECRET
 
 - **Si** kutoka Google wala Firebase. Ni nenosiri **unalojiandikia wewe** kwenye `.env` (herufi 24+ ngumu, bora random).
-- Server anahifadhi thamani moja; unapoongeza/futa ratiba kutoka UI, kivinjari kinatuma neno hilo kwenye kichwa cha HTTP **`x-admin-secret`**.
-- Ikiwa kinalingana na `ADMIN_SECRET` kwenye server, ombi linaruhusiwa. **Lengo:** mtu asiye na neno asibadilishe ratiba zako.
-- Ukibaki **bila** `ADMIN_SECRET` kwenye `.env`, API ya ratiba ni wazi (tumia tu kwa local / ndani ya mtandao unaoamini).
+- Server anahifadhi thamani moja. Kivinjari kinatuma neno hilo kwenye **`x-admin-secret`** (au `Authorization: Bearer …`) kwa:
+  - **Kutuma arifa sasa** (`POST /api/send`)
+  - **Ratiba** (GET/POST `/api/schedule`)
+- Ikiwa kinalingana na `ADMIN_SECRET`, ombi linaruhusiwa. **Lengo:** mtu asiye na neno asitume notification wala asibadilishe ratiba.
+- **Chaguo-msingi:** bila `ADMIN_SECRET` (na bila `ADMIN_AUTH_OPEN=1`), server inarudisha **503** — hakuna kutuma wala ratiba. Kwa jaribio la PC bila nenosiri, weka **`ADMIN_AUTH_OPEN=1`** (usitumie hadharani).
 
 ### CRON_SECRET
 
@@ -94,6 +97,31 @@ Fungua `http://localhost:3000`. Server inaangalia ratiba **kila dakika** moja kw
 
 ---
 
+## Shared hosting na production
+
+Mradi huu ni **Node.js** (sio PHP). **Shared hosting ya kawaida inayotoa tu PHP + MySQL** mara nyingi **haiendeshi** app hii bila kitu kingine.
+
+### Ikiwa mwenyeji wako ana Node.js (cPanel “Node.js”, “Setup Node.js App”, n.k.)
+
+1. **Sakinisho:** pakia faili za mradi (bila `node_modules`); kwenye server fanya `npm install --production` (SSH au zana ya mwenyeji).
+2. **Mazingira:** weka `FIREBASE_SERVICE_ACCOUNT_JSON` na zingine kwenye **Environment Variables** ya panel, **si** ndani ya folda inayosomeka hadharani. Usiweke `public/` ndani ya `public_html` pekee ukisahau API — ufuata maelezo ya mwenyeji jinsi ya kuunganisha **reverse proxy** kutoka domain hadi mchakato wa Node (mara nyingi port ya ndani kama 3000).
+3. **Kuanzisha app:** amri ya mwanzo iwe `node server-local.js` (au `PORT=xxxx node server-local.js` kama mwenyeji anataka port maalum). App lazima iendelee **24/7** (process isiyo zimwa); baadhi ya host hutumia **Passenger** au **PM2** — soma docs za mwenyeji.
+4. **Ratiba (JSON):** hakikisha folda `data/` inaandika (permissions). Weka `SCHEDULE_DB_PATH` kamili **nje** ya `public_html` ikiwa inawezekana.
+5. **Cron (chaguo):** `server-local.js` tayari inaangalia ratiba **kila dakika** muda process inapoendelea. Ikiwa host huzima process au unataka uhakika, weka **Cron** ya cPanel kila dakika 5 inayopiga URL yako ya production:
+   `https://domain-yako.com/api/cron`  
+   pamoja na header `Authorization: Bearer <CRON_SECRET>` (kama `curl` au zana inayoruhusu headers — cPanel mara nyingi `wget`/`curl` kwenye cron).
+
+### Ikiwa **huna** Node kwenye shared hosting
+
+Huna njia ya “kuiweka tu” kama faili za PHP. Chaguo rahisi kwa production:
+
+- **Vercel / Netlify / Railway / Render** (Node au serverless)
+- **VPS** ndogo (Hetzner, DigitalOcean, Contabo): Ubuntu + Node + `pm2` + Nginx reverse proxy
+
+**Muhtasari:** shared hosting **ya PHP tu** = haifai moja kwa moja; tafuta **Node-enabled hosting** au **VPS / PaaS**.
+
+---
+
 ## Ratiba na JSON
 
 - Faili: chaguo-msingi `data/schedules.json` (haijacommitwi).
@@ -115,8 +143,8 @@ Diski ya Vercel **haina kudumu** kwa kuandika faili: ratiba zinaweza **kupotea**
 
 | Njia | Kazi |
 |------|------|
-| `GET /api/meta` | `siteName`, `topic`, `scheduleTz`, `adminRequired`, `cronConfigured` |
-| `POST /api/send` | Tuma sasa (`title`, `body`, `image`) |
+| `GET /api/meta` | `siteName`, `topic`, `scheduleTz`, `adminAuthOpen`, `adminRequired`, `adminSecretMissing`, `cronConfigured` |
+| `POST /api/send` | Tuma sasa (`title`, `body`, `image`); ikiwa `ADMIN_SECRET` imewekwa, lazima header iendane na siri |
 | `GET/POST /api/schedule` | Orodha (GET); ongeza/futa/washa (POST + `x-admin-secret`) |
 | `GET/POST /api/cron` | Tekeleza ratiba zilizofika (Bearer `CRON_SECRET`) |
 

@@ -9,14 +9,16 @@ const { sendFcmFromBody, getFixedTopic } = require('./lib/fcmSend');
 const {
   getSiteName,
   getScheduleTz,
-  adminSecretConfigured,
+  adminSetupError,
+  adminAuthorized,
+  isAdminAuthOpen,
   getCronSecret,
   cronAuthorized,
 } = require('./lib/config');
 const { handleSchedule } = require('./lib/scheduleController');
 const { processDueSchedules } = require('./lib/scheduleEngine');
 
-const PORT = Number(process.env.PORT) || 3000;
+const BASE_PORT = Number(process.env.PORT) || 3000;
 const publicDir = path.join(__dirname, 'public');
 
 const corsApi = {
@@ -68,7 +70,9 @@ const server = http.createServer(async (req, res) => {
       siteName: getSiteName(),
       topic: getFixedTopic(),
       scheduleTz: getScheduleTz(),
-      adminRequired: adminSecretConfigured(),
+      adminAuthOpen: isAdminAuthOpen(),
+      adminRequired: !isAdminAuthOpen(),
+      adminSecretMissing: adminSetupError(),
       cronConfigured: !!getCronSecret(),
     });
     return;
@@ -124,6 +128,21 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    if (adminSetupError()) {
+      writeJson(res, 503, {
+        error:
+          'ADMIN_SECRET haipo. Weka kwenye .env.local. Dev bila nenosiri: ADMIN_AUTH_OPEN=1 (si salama hadharani).',
+      });
+      return;
+    }
+    if (!adminAuthorized(req.headers)) {
+      writeJson(res, 401, {
+        error:
+          'Hitaji nenosiri la admin (x-admin-secret au Bearer sawa na ADMIN_SECRET).',
+      });
+      return;
+    }
+
     const result = await sendFcmFromBody(parsed);
     if (!result.ok) {
       writeJson(res, result.status, { error: result.error });
@@ -165,6 +184,27 @@ setInterval(() => {
   );
 }, 60 * 1000);
 
-server.listen(PORT, () => {
-  console.log(`Local: http://localhost:${PORT}`);
-});
+function listenOnPort(port) {
+  const max = port + 25;
+  server.once('error', (err) => {
+    if (err.code === 'EADDRINUSE' && port < max) {
+      const next = port + 1;
+      console.warn(`Port ${port} tayari inatumika → ${next}`);
+      listenOnPort(next);
+    } else {
+      console.error(err);
+      process.exit(1);
+    }
+  });
+  server.listen(port, () => {
+    server.removeAllListeners('error');
+    if (port !== BASE_PORT) {
+      console.warn(
+        `Ili kutumia port hii kila wakati, weka PORT=${port} kwenye .env.local`
+      );
+    }
+    console.log(`Local: http://localhost:${port}`);
+  });
+}
+
+listenOnPort(BASE_PORT);
