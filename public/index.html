@@ -255,20 +255,22 @@
     </div>
 
     <div id="adminWrap" class="panel" hidden>
-      <h2>Ingia (admin)</h2>
+      <h2>Ingia kwanza</h2>
       <p class="hint" style="margin-top:0;">
-        Server inatumia <code>ADMIN_SECRET</code> kwenye <code>.env</code>. Weka hapa nenosiri <strong>lile lile</strong> ili
-        <strong>kutuma arifa sasa</strong>. Hii siyo akaunti ya Google — ni neno ulijiseti wewe mwenyeji wa server.
+        Weka <code>ADMIN_SECRET</code> yako. Ukifanikiwa kuingia, utaona sehemu ya
+        <strong>kutuma arifa sasa</strong>. Hii siyo akaunti ya Google.
       </p>
       <label for="adminKey">Nenosiri la admin</label>
       <input id="adminKey" type="password" placeholder="Siri sawa na ADMIN_SECRET kwenye .env" autocomplete="current-password" />
-      <p class="hint">Inahifadhiwa kwenye kivinjari (sessionStorage) tu kwa tab hii.</p>
+      <button type="button" class="primary" id="loginBtn" style="margin-top:0.15rem;">Ingia</button>
+      <div id="loginOut" class="out" style="min-height:1rem;"></div>
+      <p class="hint">Inahifadhiwa kwenye kivinjari (sessionStorage) kwa tab hii.</p>
       <button type="button" class="ghost" id="clearAdminKey" style="width:100%;margin-top:0.25rem;">
-        Ondoa nenosiri kwenye kivinjari (session)
+        Toka (ondoa nenosiri kwenye session)
       </button>
     </div>
 
-    <section class="panel">
+    <section id="sendPanel" class="panel" hidden aria-hidden="true">
       <h2>Tuma sasa</h2>
       <p id="sendGateHint" class="hint" style="display:none;margin-top:0;">
         Weka nenosiri la admin hapo juu kabla ya kutuma. Kivinjari kinaweza kuikumbuka katika tab hii (sessionStorage).
@@ -342,6 +344,9 @@
     const schedList = document.getElementById('schedList');
     const adminWrap = document.getElementById('adminWrap');
     const adminInput = document.getElementById('adminKey');
+    const loginBtn = document.getElementById('loginBtn');
+    const loginOut = document.getElementById('loginOut');
+    const sendPanel = document.getElementById('sendPanel');
     const schedBtn = document.getElementById('schedBtn');
     const schedPanelSection = document.getElementById('schedPanelSection');
     if (SHOW_SCHEDULE_UI && schedPanelSection) {
@@ -350,18 +355,61 @@
     }
 
     adminInput.value = sessionStorage.getItem(ADMIN_KEY) || '';
-    function persistAdminKey() {
-      sessionStorage.setItem(ADMIN_KEY, adminInput.value.trim());
-      updateAuthGates();
-      if (SHOW_SCHEDULE_UI && sendScheduleAllowed() && scheduleModePersistent()) loadSchedules();
-      else if (SHOW_SCHEDULE_UI) {
-        schedList.innerHTML = '';
-        schedOut.textContent = '';
-        schedOut.className = 'out';
-      }
+    let adminAuthenticated = false;
+
+    function applyLoginGate() {
+      const needs = needsBrowserAdmin();
+      const canSeeApp = !needs || adminAuthenticated;
+      sendPanel.hidden = !canSeeApp;
+      if (canSeeApp) sendPanel.removeAttribute('aria-hidden');
+      else sendPanel.setAttribute('aria-hidden', 'true');
+
+      if (needs) adminWrap.hidden = adminAuthenticated;
     }
-    adminInput.addEventListener('change', persistAdminKey);
-    adminInput.addEventListener('input', persistAdminKey);
+
+    async function verifyAdminSecret(secret) {
+      const res = await fetch('/api/schedule', {
+        method: 'GET',
+        headers: {
+          'x-admin-secret': secret,
+        },
+      });
+      return res.ok;
+    }
+
+    async function tryLogin() {
+      const secret = (adminInput.value || '').trim();
+      if (!secret) {
+        loginOut.className = 'out err';
+        loginOut.textContent = 'Weka nenosiri la admin.';
+        return;
+      }
+      loginOut.className = 'out';
+      loginOut.textContent = 'Inathibitisha...';
+      loginBtn.disabled = true;
+      try {
+        const ok = await verifyAdminSecret(secret);
+        if (!ok) {
+          adminAuthenticated = false;
+          sessionStorage.removeItem(ADMIN_KEY);
+          loginOut.className = 'out err';
+          loginOut.textContent = 'Nenosiri si sahihi.';
+          applyLoginGate();
+          updateAuthGates();
+          return;
+        }
+        adminAuthenticated = true;
+        sessionStorage.setItem(ADMIN_KEY, secret);
+        loginOut.className = 'out ok';
+        loginOut.textContent = 'Umeingia.';
+        applyLoginGate();
+        updateAuthGates();
+      } catch (err) {
+        loginOut.className = 'out err';
+        loginOut.textContent = 'Mtandao: ' + (err && err.message ? err.message : String(err));
+      }
+      loginBtn.disabled = false;
+    }
 
     function scheduleModePersistent() {
       if (!meta || meta.schedulePersistent === false) return false;
@@ -394,7 +442,7 @@
     function sendScheduleAllowed() {
       if (!meta || meta.adminAuthOpen) return true;
       if (meta.adminSecretMissing) return false;
-      return hasAdminKey();
+      return adminAuthenticated;
     }
 
     function needsBrowserAdmin() {
@@ -405,11 +453,13 @@
       const ok = sendScheduleAllowed();
       btn.disabled = !ok;
       if (SHOW_SCHEDULE_UI) schedBtn.disabled = !ok;
+      const sendGate = document.getElementById('sendGateHint');
+      if (sendGate) sendGate.style.display = ok ? 'none' : 'block';
     }
 
     function adminHeaders() {
       const h = { 'Content-Type': 'application/json' };
-      const s = (adminInput.value || sessionStorage.getItem(ADMIN_KEY) || '').trim();
+      const s = (sessionStorage.getItem(ADMIN_KEY) || adminInput.value || '').trim();
       if (s) h['x-admin-secret'] = s;
       return h;
     }
@@ -452,16 +502,19 @@
         if (j.adminAuthOpen) {
           devChip.style.display = 'inline-flex';
           mis.style.display = 'none';
+          adminAuthenticated = true;
           adminWrap.setAttribute('hidden', '');
           sendGate.style.display = 'none';
         } else {
           devChip.style.display = 'none';
           if (j.adminSecretMissing) {
             mis.style.display = 'block';
+            adminAuthenticated = false;
             adminWrap.setAttribute('hidden', '');
             sendGate.style.display = 'none';
           } else {
             mis.style.display = 'none';
+            adminAuthenticated = false;
             adminWrap.removeAttribute('hidden');
             sendGate.style.display = 'block';
           }
@@ -487,19 +540,58 @@
         } else {
           cronChip.style.display = 'none';
         }
+
+        // Kama kuna siri iliyohifadhiwa kwenye session, thibitisha kisha ingiza moja kwa moja.
+        if (needsBrowserAdmin()) {
+          const cached = (sessionStorage.getItem(ADMIN_KEY) || '').trim();
+          if (cached) {
+            adminInput.value = cached;
+            verifyAdminSecret(cached)
+              .then((ok) => {
+                adminAuthenticated = !!ok;
+                if (!ok) sessionStorage.removeItem(ADMIN_KEY);
+                if (!ok) {
+                  loginOut.className = 'out err';
+                  loginOut.textContent = 'Session ya login imeisha, ingia tena.';
+                }
+                applyLoginGate();
+                updateAuthGates();
+              })
+              .catch(() => {
+                adminAuthenticated = false;
+                applyLoginGate();
+                updateAuthGates();
+              });
+          }
+        }
+
+        applyLoginGate();
         applySchedulePanelMode();
         updateAuthGates();
         if (SHOW_SCHEDULE_UI && sendScheduleAllowed() && scheduleModePersistent()) loadSchedules();
       })
       .catch(() => {
+        applyLoginGate();
         applySchedulePanelMode();
         updateAuthGates();
         if (SHOW_SCHEDULE_UI && sendScheduleAllowed() && scheduleModePersistent()) loadSchedules();
       });
 
+    loginBtn.addEventListener('click', tryLogin);
+    adminInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        tryLogin();
+      }
+    });
+
     document.getElementById('clearAdminKey').addEventListener('click', () => {
       sessionStorage.removeItem(ADMIN_KEY);
       adminInput.value = '';
+      adminAuthenticated = false;
+      loginOut.className = 'out';
+      loginOut.textContent = '';
+      applyLoginGate();
       updateAuthGates();
     });
 
