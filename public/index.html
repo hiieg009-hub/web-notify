@@ -14,9 +14,9 @@
       --glass-highlight: rgba(255, 255, 255, 0.1);
       --text: #f0f4fa;
       --muted: rgba(230, 237, 247, 0.62);
-      --accent: #ff8a3d;
-      --accent-2: #ffb15c;
-      --accent-glow: rgba(255, 138, 61, 0.38);
+      --accent: #ea580c;
+      --accent-2: #f97316;
+      --accent-glow: rgba(234, 88, 12, 0.45);
       --green: #4ade80;
       --green-2: #22c55e;
       --green-glow: rgba(74, 222, 128, 0.32);
@@ -39,9 +39,9 @@
       inset: 0;
       z-index: 0;
       background:
-        radial-gradient(ellipse 90% 70% at 18% 8%, rgba(255, 138, 61, 0.28), transparent 55%),
+        radial-gradient(ellipse 90% 70% at 18% 8%, rgba(234, 88, 12, 0.34), transparent 55%),
         radial-gradient(ellipse 80% 60% at 88% 22%, rgba(34, 197, 94, 0.22), transparent 50%),
-        radial-gradient(ellipse 75% 55% at 50% 98%, rgba(255, 177, 92, 0.16), transparent 45%),
+        radial-gradient(ellipse 75% 55% at 50% 98%, rgba(249, 115, 22, 0.18), transparent 45%),
         linear-gradient(165deg, #0a0e0c 0%, #121814 45%, #0b110e 100%);
       pointer-events: none;
     }
@@ -75,7 +75,7 @@
     .panel--hero {
       padding-top: 1.6rem;
       text-align: center;
-      border-color: rgba(255, 138, 61, 0.22);
+      border-color: rgba(234, 88, 12, 0.28);
       box-shadow:
         0 4px 28px rgba(0, 0, 0, 0.32),
         inset 0 1px 0 var(--glass-highlight),
@@ -95,15 +95,15 @@
       font-size: 1.65rem;
       font-weight: 700;
       letter-spacing: -0.02em;
-      background: linear-gradient(120deg, #ffb15c 0%, #ffffff 50%, #4ade80 100%);
+      background: linear-gradient(120deg, #f97316 0%, #ffffff 50%, #4ade80 100%);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
     }
     .panel--auth {
-      border-color: rgba(255, 138, 61, 0.28);
+      border-color: rgba(234, 88, 12, 0.35);
       background:
-        linear-gradient(180deg, rgba(255, 138, 61, 0.05), transparent 60%),
+        linear-gradient(180deg, rgba(234, 88, 12, 0.07), transparent 60%),
         var(--glass-bg);
     }
     .panel--auth::before {
@@ -129,9 +129,9 @@
       display: grid;
       place-items: center;
       color: var(--accent);
-      background: linear-gradient(135deg, rgba(255, 138, 61, 0.18), rgba(74, 222, 128, 0.14));
-      border: 1px solid rgba(255, 138, 61, 0.32);
-      box-shadow: 0 0 18px rgba(255, 138, 61, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      background: linear-gradient(135deg, rgba(234, 88, 12, 0.25), rgba(74, 222, 128, 0.16));
+      border: 1px solid rgba(234, 88, 12, 0.42);
+      box-shadow: 0 0 20px rgba(234, 88, 12, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
     .auth-icon svg { width: 22px; height: 22px; }
     .auth-head .auth-text { display: flex; flex-direction: column; gap: 2px; }
@@ -182,7 +182,7 @@
       place-items: center;
       transition: color 0.15s, background 0.15s;
     }
-    .pwd-toggle:hover { color: var(--accent-2); background: rgba(255, 138, 61, 0.1); }
+    .pwd-toggle:hover { color: var(--accent-2); background: rgba(234, 88, 12, 0.14); }
     .pwd-toggle svg { width: 18px; height: 18px; }
     .panel--hero .sub {
       margin: 0 0 1rem;
@@ -249,7 +249,7 @@
     input:hover, textarea:hover, select:hover { border-color: rgba(255, 255, 255, 0.18); }
     input:focus, textarea:focus, select:focus {
       outline: none;
-      border-color: rgba(255, 138, 61, 0.65);
+      border-color: rgba(234, 88, 12, 0.7);
       box-shadow: 0 0 0 3px var(--accent-glow);
       background: rgba(0, 0, 0, 0.4);
     }
