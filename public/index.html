@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Notifications</title>
+  <title>BETMAKINI APP</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -510,7 +510,7 @@
           <span>Logout</span>
         </button>
       </div>
-      <h1 id="siteTitle">Notifications</h1>
+      <h1 id="siteTitle">BETMAKINI APP</h1>
       <p class="sub" id="siteSub">Send notifications now</p>
       <div class="chips">
         <div class="chip"><span>Topic</span> <strong id="topicDisplay">—</strong></div>
@@ -786,7 +786,7 @@
     }
 
     let meta = {
-      siteName: 'Notifications',
+        siteName: 'BETMAKINI APP',
       topic: '',
       scheduleTz: 'UTC',
       schedulePersistent: true,
@@ -801,8 +801,8 @@
       .then((j) => {
         if (!j) return;
         meta = j;
-        document.getElementById('siteTitle').textContent = j.siteName || 'Notifications';
-        document.title = j.siteName || 'Notifications';
+        document.getElementById('siteTitle').textContent = j.siteName || 'BETMAKINI APP';
+        document.title = j.siteName || 'BETMAKINI APP';
         document.getElementById('topicDisplay').textContent = j.topic || '—';
         if (SHOW_SCHEDULE_UI && j.scheduleTz) {
           document.getElementById('tzChip').style.display = 'inline-flex';
