@@ -299,6 +299,23 @@
     }
     button.ghost:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.22); }
     button.danger-ghost:hover { background: rgba(180, 60, 60, 0.22); }
+    button.ghost--logout {
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.7rem 1rem;
+      font-size: 0.88rem;
+      color: var(--err);
+      border-color: rgba(242, 164, 164, 0.32);
+      background: rgba(180, 60, 60, 0.08);
+    }
+    button.ghost--logout svg { width: 16px; height: 16px; }
+    button.ghost--logout:hover {
+      background: rgba(180, 60, 60, 0.2);
+      border-color: rgba(242, 164, 164, 0.55);
+    }
     .out {
       margin-top: 0.85rem;
       padding: 0.9rem 1rem;
@@ -483,6 +500,14 @@
         <button type="submit" class="primary" id="btn">Send now</button>
       </form>
       <div id="out" class="out" aria-live="polite"></div>
+      <button type="button" class="ghost ghost--logout" id="bottomLogoutBtn" style="margin-top:1rem;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        Logout
+      </button>
     </section>
 
     <!-- Schedule: hidden in the UI (the /api/schedule endpoint still exists for internal/future use). Set SHOW_SCHEDULE_UI = true in the script to bring it back. -->
@@ -812,6 +837,12 @@
     document.getElementById('clearAdminKey').addEventListener('click', performLogout);
     const topLogoutBtn = document.getElementById('topLogoutBtn');
     if (topLogoutBtn) topLogoutBtn.addEventListener('click', performLogout);
+    const bottomLogoutBtn = document.getElementById('bottomLogoutBtn');
+    if (bottomLogoutBtn) bottomLogoutBtn.addEventListener('click', () => {
+      performLogout();
+      try { document.getElementById('adminKey')?.focus(); } catch (_) {}
+      try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (_) { window.scrollTo(0, 0); }
+    });
 
     const refreshBtn = document.getElementById('refreshBtn');
     if (refreshBtn) {
