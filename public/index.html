@@ -511,7 +511,7 @@
         </button>
       </div>
       <h1 id="siteTitle">Notifications</h1>
-      <p class="sub" id="siteSub">FCM notifications — send now</p>
+      <p class="sub" id="siteSub">Send notifications now</p>
       <div class="chips">
         <div class="chip"><span>Topic</span> <strong id="topicDisplay">—</strong></div>
         <div class="chip" id="tzChip" style="display:none;"><span>Time</span> <strong id="tzDisplay"></strong></div>
@@ -802,7 +802,7 @@
         if (!j) return;
         meta = j;
         document.getElementById('siteTitle').textContent = j.siteName || 'Notifications';
-        document.title = (j.siteName || 'Notifications') + ' — FCM';
+        document.title = j.siteName || 'Notifications';
         document.getElementById('topicDisplay').textContent = j.topic || '—';
         if (SHOW_SCHEDULE_UI && j.scheduleTz) {
           document.getElementById('tzChip').style.display = 'inline-flex';
