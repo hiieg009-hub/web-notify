@@ -196,30 +196,30 @@
     }
     .auth-head {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 0.85rem;
-      margin-bottom: 1.1rem;
+      gap: 0.55rem;
+      margin-bottom: 1rem;
+      text-align: center;
     }
-    .auth-icon {
+    .auth-logo {
       flex: 0 0 auto;
-      width: 46px;
-      height: 46px;
-      border-radius: 13px;
-      display: grid;
-      place-items: center;
-      color: #fdba74;
-      background: linear-gradient(135deg, rgba(249, 115, 22, 0.32), rgba(74, 222, 128, 0.24));
-      border: 1px solid rgba(249, 115, 22, 0.22);
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center;
+      background: rgba(0, 0, 0, 0.3);
       box-shadow:
-        0 0 24px rgba(249, 115, 22, 0.32),
-        0 0 0 1px rgba(74, 222, 128, 0.18),
-        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        0 10px 28px rgba(154, 52, 18, 0.35),
+        0 0 0 1px rgba(255, 247, 237, 0.06),
+        0 0 24px rgba(74, 222, 128, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
-    .auth-icon svg { width: 22px; height: 22px; }
-    .auth-head .auth-text { display: flex; flex-direction: column; gap: 2px; }
+    .auth-head .auth-text { display: flex; flex-direction: column; gap: 2px; align-items: center; }
     .auth-head h2 {
       margin: 0;
-      font-size: 0.95rem;
+      font-size: 0.98rem;
       font-weight: 700;
       letter-spacing: 0;
       text-transform: none;
@@ -753,13 +753,7 @@
 
     <div id="adminWrap" class="panel panel--auth" hidden>
       <div class="auth-head">
-        <div class="auth-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="4" y="11" width="16" height="10" rx="2"></rect>
-            <path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
-            <circle cx="12" cy="16" r="1.2" fill="currentColor"></circle>
-          </svg>
-        </div>
+        <img src="/betmakini-logo.jpg" alt="BetMakini" class="auth-logo" />
         <div class="auth-text">
           <h2>Sign in first</h2>
           <span class="auth-sub">Enter the admin password to continue</span>
