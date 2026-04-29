@@ -1,4 +1,4 @@
-# web-notify  fcm services by benjamin omary.
+# web-notify  bmk services by ceo valley.
 
 Tovuti ndogo ya kutuma arifa kupitia **Firebase Cloud Messaging (HTTP v1)** — `data`: `title`, `body`, `image`. Ina **tuma sasa** na **ratiba** (mara moja au kila siku), hifadhi **JSON** ya ndani.
 
@@ -13,7 +13,7 @@ Badilisha tu `.env` kwa kila mradi (jina, topic, siri):
 | Variable | Maana |
 |----------|--------|
 | `SITE_NAME` | Jina linaonekana kwenye kichwa cha ukurasa |
-| `FCM_TOPIC` | Topic thabiti ya FCM (mfano `BETMAKINI`) |
+| `ceo_valley` | Topic thabiti ya BMK (mfano `BETMAKINI`) |
 | `SCHEDULE_TZ` | Kanda ya wakati kwa ratiba ya kila siku (mfano `Africa/Nairobi`) |
 | `SCHEDULE_DB_PATH` | (Chaguo) njia ya faili ya JSON; chaguo-msingi `data/schedules.json` |
 | `ADMIN_SECRET` | **Lazima** (isipokuwa `ADMIN_AUTH_OPEN=1`). Linazuia **kutuma** na **ratiba** bila `x-admin-secret` / Bearer |
@@ -72,7 +72,7 @@ Ratiba hutekelezwa **kila dakika** na `server-local.js` bila kuhitaji kuipiga `/
 
 - Repo **Private** kwenye GitHub.
 - **Usicommit:** `service-account.json`, `.env*`, `data/*.json` ya ratiba, `google-services.json`, funguo.
-- Topic na jina la tovuti zinatoka **server** (`FCM_TOPIC`, `SITE_NAME`); mteja hawezi kubadilisha topic kwa njia ya siri.
+- Topic na jina la tovuti zinatoka **server** (`CEO_VALLEY`, `SITE_NAME`); mteja hawezi kubadilisha topic kwa njia ya siri.
 
 ---
 
