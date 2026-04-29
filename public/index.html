@@ -623,7 +623,7 @@
       background: linear-gradient(90deg, var(--accent-3) 0%, #fdba74 50%, var(--green) 100%);
       box-shadow: 0 0 16px rgba(249, 115, 22, 0.55);
       transform-origin: left center;
-      animation: barFill 1.6s 0.25s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+      animation: barFill 3.2s 0.25s cubic-bezier(0.65, 0, 0.35, 1) forwards;
       transform: scaleX(0);
     }
     .splash__bar::after {
@@ -632,7 +632,7 @@
       top: 0; bottom: 0;
       width: 60px;
       background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
-      animation: barShine 1.6s 0.25s ease-in-out forwards;
+      animation: barShine 3.2s 0.25s ease-in-out forwards;
       transform: translateX(-100%);
     }
     @keyframes splashLogoIn {
@@ -698,7 +698,7 @@
     (function () {
       var splash = document.getElementById('splash');
       if (!splash) return;
-      var hideAt = 2100; // ms — bar fills at ~1.85s, give a tiny buffer
+      var hideAt = 3700; // ms — bar fills at ~3.45s, give a small buffer
       function hide() {
         document.body.classList.add('app-ready');
         splash.classList.add('is-hidden');
