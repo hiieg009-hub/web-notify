@@ -60,24 +60,39 @@
       padding: 1.75rem 1.25rem 3rem;
     }
     .panel {
+      position: relative;
       background: var(--glass-bg);
       backdrop-filter: blur(20px) saturate(160%);
       -webkit-backdrop-filter: blur(20px) saturate(160%);
       border: 1px solid var(--glass-border);
       border-radius: var(--radius);
-      padding: 1.35rem 1.35rem 1.5rem;
+      padding: 1.45rem 1.4rem 1.55rem;
       margin-bottom: 1.1rem;
       box-shadow:
-        0 4px 24px rgba(0, 0, 0, 0.25),
+        0 4px 24px rgba(0, 0, 0, 0.28),
         inset 0 1px 0 var(--glass-highlight);
     }
     .panel--hero {
-      padding-top: 1.5rem;
+      padding-top: 1.6rem;
       text-align: center;
+      border-color: rgba(255, 138, 61, 0.22);
+      box-shadow:
+        0 4px 28px rgba(0, 0, 0, 0.32),
+        inset 0 1px 0 var(--glass-highlight),
+        0 0 0 1px rgba(74, 222, 128, 0.07);
+      overflow: hidden;
+    }
+    .panel--hero::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent) 30%, var(--green) 70%, transparent);
+      opacity: 0.85;
     }
     .panel--hero h1 {
-      margin: 0 0 0.35rem;
-      font-size: 1.55rem;
+      margin: 0 0 0.4rem;
+      font-size: 1.65rem;
       font-weight: 700;
       letter-spacing: -0.02em;
       background: linear-gradient(120deg, #ffb15c 0%, #ffffff 50%, #4ade80 100%);
@@ -85,13 +100,90 @@
       background-clip: text;
       color: transparent;
     }
-    .panel--hero {
-      border-color: rgba(255, 138, 61, 0.22);
-      box-shadow:
-        0 4px 28px rgba(0, 0, 0, 0.28),
-        inset 0 1px 0 var(--glass-highlight),
-        0 0 0 1px rgba(74, 222, 128, 0.06);
+    .panel--auth {
+      border-color: rgba(255, 138, 61, 0.28);
+      background:
+        linear-gradient(180deg, rgba(255, 138, 61, 0.05), transparent 60%),
+        var(--glass-bg);
     }
+    .panel--auth::before {
+      content: "";
+      position: absolute;
+      top: -1px; left: 1.4rem; right: 1.4rem;
+      height: 2px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--green));
+      opacity: 0.7;
+    }
+    .auth-head {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      margin-bottom: 1.1rem;
+    }
+    .auth-icon {
+      flex: 0 0 auto;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: var(--accent);
+      background: linear-gradient(135deg, rgba(255, 138, 61, 0.18), rgba(74, 222, 128, 0.14));
+      border: 1px solid rgba(255, 138, 61, 0.32);
+      box-shadow: 0 0 18px rgba(255, 138, 61, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+    .auth-icon svg { width: 22px; height: 22px; }
+    .auth-head .auth-text { display: flex; flex-direction: column; gap: 2px; }
+    .auth-head h2 {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--text);
+    }
+    .auth-head .auth-sub {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .pwd-field { position: relative; margin-bottom: 1rem; }
+    .pwd-field input {
+      margin-bottom: 0;
+      padding-right: 3rem;
+      padding-left: 2.6rem;
+      letter-spacing: 0.02em;
+    }
+    .pwd-field .pwd-leading {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+      display: grid;
+      place-items: center;
+    }
+    .pwd-field .pwd-leading svg { width: 16px; height: 16px; }
+    .pwd-toggle {
+      position: absolute;
+      right: 0.45rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: color 0.15s, background 0.15s;
+    }
+    .pwd-toggle:hover { color: var(--accent-2); background: rgba(255, 138, 61, 0.1); }
+    .pwd-toggle svg { width: 18px; height: 18px; }
     .panel--hero .sub {
       margin: 0 0 1rem;
       font-size: 0.88rem;
@@ -143,73 +235,84 @@
     }
     input, textarea, select {
       width: 100%;
-      padding: 0.72rem 0.9rem;
+      padding: 0.78rem 0.95rem;
       border-radius: var(--radius-sm);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      background: rgba(0, 0, 0, 0.28);
+      background: rgba(0, 0, 0, 0.32);
       color: var(--text);
       font-size: 0.95rem;
       font-family: inherit;
       margin-bottom: 1rem;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
     }
-    input::placeholder, textarea::placeholder { color: rgba(230, 237, 247, 0.35); }
+    input::placeholder, textarea::placeholder { color: rgba(230, 237, 247, 0.4); }
+    input:hover, textarea:hover, select:hover { border-color: rgba(255, 255, 255, 0.18); }
     input:focus, textarea:focus, select:focus {
       outline: none;
-      border-color: rgba(255, 138, 61, 0.55);
+      border-color: rgba(255, 138, 61, 0.65);
       box-shadow: 0 0 0 3px var(--accent-glow);
+      background: rgba(0, 0, 0, 0.4);
     }
-    textarea { min-height: 80px; resize: vertical; }
+    textarea { min-height: 88px; resize: vertical; }
     button.primary {
       width: 100%;
-      padding: 0.78rem 1rem;
+      padding: 0.85rem 1rem;
       border: none;
       border-radius: var(--radius-sm);
       font-family: inherit;
       font-size: 0.95rem;
       font-weight: 700;
+      letter-spacing: 0.01em;
       cursor: pointer;
-      color: #061018;
+      color: #1a0a00;
       background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
-      box-shadow: 0 4px 20px var(--accent-glow);
+      box-shadow: 0 6px 22px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.25);
       margin-bottom: 0.35rem;
-      transition: transform 0.15s, filter 0.15s;
+      transition: transform 0.15s, filter 0.15s, box-shadow 0.2s;
     }
-    button.primary:hover { filter: brightness(1.06); transform: translateY(-1px); }
-    button.primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+    button.primary:hover { filter: brightness(1.06); transform: translateY(-1px); box-shadow: 0 10px 28px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.3); }
+    button.primary:active { transform: translateY(0); }
+    button.primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+    button.primary--success {
+      color: #06140a;
+      background: linear-gradient(135deg, var(--green-2) 0%, var(--green) 100%);
+      box-shadow: 0 6px 22px var(--green-glow), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
     button.ghost, button.danger-ghost {
       flex: 1;
-      padding: 0.5rem 0.65rem;
+      padding: 0.55rem 0.7rem;
       border-radius: var(--radius-sm);
       font-family: inherit;
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       font-weight: 600;
       cursor: pointer;
       border: 1px solid rgba(255, 255, 255, 0.14);
       background: rgba(255, 255, 255, 0.05);
       color: var(--text);
       margin: 0;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
     }
     button.danger-ghost {
       border-color: rgba(242, 164, 164, 0.35);
       color: var(--err);
       background: rgba(180, 60, 60, 0.12);
     }
-    button.ghost:hover { background: rgba(255, 255, 255, 0.1); }
-    button.danger-ghost:hover { background: rgba(180, 60, 60, 0.2); }
+    button.ghost:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.22); }
+    button.danger-ghost:hover { background: rgba(180, 60, 60, 0.22); }
     .out {
       margin-top: 0.85rem;
       padding: 0.9rem 1rem;
       border-radius: var(--radius-sm);
-      font-size: 0.82rem;
+      font-size: 0.85rem;
       white-space: pre-wrap;
       word-break: break-word;
       min-height: 2.5rem;
-      background: rgba(0, 0, 0, 0.2);
+      background: rgba(0, 0, 0, 0.25);
       border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: border-color 0.2s, background 0.2s;
     }
-    .out.err { color: var(--err); border-color: rgba(242, 164, 164, 0.25); }
-    .out.ok { color: var(--ok); border-color: rgba(143, 217, 168, 0.25); }
+    .out.err { color: var(--err); border-color: rgba(242, 164, 164, 0.3); background: rgba(180, 60, 60, 0.1); }
+    .out.ok { color: var(--ok); border-color: rgba(74, 222, 128, 0.32); background: rgba(34, 197, 94, 0.08); }
     .hint { font-size: 0.72rem; color: var(--muted); margin: -0.35rem 0 1rem; line-height: 1.4; }
     .panel code {
       font-size: 0.8em;
@@ -265,18 +368,46 @@
       </p>
     </div>
 
-    <div id="adminWrap" class="panel" hidden>
-      <h2>Ingia kwanza</h2>
-      <!--<p class="hint" style="margin-top:0;">
-        Weka <code>ADMIN_SECRET</code> yako. Ukifanikiwa kuingia, utaona sehemu ya
-        <strong>kutuma arifa sasa</strong>. Hii siyo akaunti ya Google.
-      </p>-->
+    <div id="adminWrap" class="panel panel--auth" hidden>
+      <div class="auth-head">
+        <div class="auth-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="11" width="16" height="10" rx="2"></rect>
+            <path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
+            <circle cx="12" cy="16" r="1.2" fill="currentColor"></circle>
+          </svg>
+        </div>
+        <div class="auth-text">
+          <h2>Ingia kwanza</h2>
+          <span class="auth-sub">Weka nenosiri la admin ili kuendelea</span>
+        </div>
+      </div>
       <label for="adminKey">Nenosiri la admin</label>
-      <input id="adminKey" type="password" placeholder="Weka Password Hapa" autocomplete="current-password" />
-      <button type="button" class="primary" id="loginBtn" style="margin-top:0.15rem;">Ingia</button>
+      <div class="pwd-field">
+        <span class="pwd-leading" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 2 13 10"></path>
+            <path d="m18 5 3 3"></path>
+            <circle cx="9" cy="15" r="5"></circle>
+          </svg>
+        </span>
+        <input id="adminKey" type="password" placeholder="Weka password hapa" autocomplete="current-password" />
+        <button type="button" class="pwd-toggle" id="pwdToggle" aria-label="Onyesha nenosiri" aria-pressed="false">
+          <svg id="pwdEyeOn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          <svg id="pwdEyeOff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+            <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c6.5 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path>
+            <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3.5 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path>
+            <line x1="2" y1="2" x2="22" y2="22"></line>
+          </svg>
+        </button>
+      </div>
+      <button type="button" class="primary" id="loginBtn">Ingia</button>
       <div id="loginOut" class="out" style="min-height:1rem;"></div>
-       <!--<p class="hint">Inahifadhiwa kwenye kivinjari.</p>-->
-      <button type="button" class="ghost" id="clearAdminKey" style="width:100%;margin-top:0.25rem;">
+      <button type="button" class="ghost" id="clearAdminKey" style="width:100%;margin-top:0.5rem;">
         Logout
       </button>
     </div>
@@ -595,6 +726,20 @@
         tryLogin();
       }
     });
+
+    const pwdToggleBtn = document.getElementById('pwdToggle');
+    const pwdEyeOn = document.getElementById('pwdEyeOn');
+    const pwdEyeOff = document.getElementById('pwdEyeOff');
+    if (pwdToggleBtn) {
+      pwdToggleBtn.addEventListener('click', () => {
+        const showing = adminInput.type === 'text';
+        adminInput.type = showing ? 'password' : 'text';
+        pwdToggleBtn.setAttribute('aria-pressed', String(!showing));
+        pwdToggleBtn.setAttribute('aria-label', showing ? 'Onyesha nenosiri' : 'Ficha nenosiri');
+        if (pwdEyeOn) pwdEyeOn.style.display = showing ? '' : 'none';
+        if (pwdEyeOff) pwdEyeOff.style.display = showing ? 'none' : '';
+      });
+    }
 
     document.getElementById('clearAdminKey').addEventListener('click', () => {
       sessionStorage.removeItem(ADMIN_KEY);
