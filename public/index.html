@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>BetMakini Notification</title>
+  <title>BetMakini Notification system</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -122,16 +122,41 @@
       opacity: 0.75;
     }
     .panel--hero h1 {
-      margin: 0 0 0.45rem;
-      font-size: 1.75rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
+      margin: 0;
+      font-size: 2.05rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
       background: linear-gradient(120deg, var(--accent-3) 0%, #fdba74 45%, var(--green) 100%);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
       text-shadow: 0 0 38px rgba(154, 52, 18, 0.32);
     }
+    .hero-tagline {
+      margin: 0.35rem 0 1rem;
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(232, 240, 248, 0.55);
+      position: relative;
+      display: inline-block;
+      padding: 0 0.9rem;
+    }
+    .hero-tagline::before,
+    .hero-tagline::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 22px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(74, 222, 128, 0.45));
+    }
+    .hero-tagline::before {
+      right: 100%;
+      background: linear-gradient(90deg, transparent, rgba(249, 115, 22, 0.45));
+    }
+    .hero-tagline::after { left: 100%; }
     .panel--auth {
       border-color: rgba(249, 115, 22, 0.36);
       background:
@@ -400,6 +425,66 @@
     }
     .out.err { color: var(--err); border-color: rgba(242, 164, 164, 0.3); background: rgba(180, 60, 60, 0.1); }
     .out.ok { color: var(--ok); border-color: rgba(74, 222, 128, 0.32); background: rgba(34, 197, 94, 0.08); }
+    .success-card {
+      margin-top: 1rem;
+      padding: 1.15rem 1.1rem;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      gap: 0.95rem;
+      background:
+        radial-gradient(120% 80% at 0% 0%, rgba(34, 197, 94, 0.22), transparent 60%),
+        linear-gradient(180deg, rgba(34, 197, 94, 0.14), rgba(34, 197, 94, 0.04));
+      border: 1px solid rgba(74, 222, 128, 0.42);
+      box-shadow:
+        0 10px 30px rgba(34, 197, 94, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      animation: successPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes successPop {
+      from { opacity: 0; transform: translateY(8px) scale(0.96); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .success-card__icon {
+      flex: 0 0 auto;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--green-2), var(--green));
+      box-shadow: 0 0 24px var(--green-glow), inset 0 1px 0 rgba(255, 255, 255, 0.32);
+      color: #06140a;
+    }
+    .success-card__icon svg { width: 24px; height: 24px; }
+    .success-card__icon svg path {
+      stroke-dasharray: 32;
+      stroke-dashoffset: 32;
+      animation: drawCheck 0.55s 0.15s ease-out forwards;
+    }
+    @keyframes drawCheck {
+      to { stroke-dashoffset: 0; }
+    }
+    .success-card__body { flex: 1 1 auto; min-width: 0; }
+    .success-card__title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #ecfdf5;
+      letter-spacing: -0.005em;
+      margin: 0 0 0.2rem;
+    }
+    .success-card__sub {
+      font-size: 0.82rem;
+      color: rgba(220, 252, 231, 0.72);
+      line-height: 1.45;
+      margin: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .success-card[hidden] { display: none; }
     .hint { font-size: 0.72rem; color: var(--muted); margin: -0.35rem 0 1rem; line-height: 1.4; }
     .panel code {
       font-size: 0.8em;
@@ -432,15 +517,209 @@
     }
     .panel--warn h2 { color: var(--err); }
 
+    /* ===== Splash / Intro ===== */
+    .splash {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.6rem;
+      background:
+        radial-gradient(ellipse 70% 55% at 18% 12%, rgba(154, 52, 18, 0.55), transparent 55%),
+        radial-gradient(ellipse 65% 50% at 82% 88%, rgba(34, 197, 94, 0.32), transparent 55%),
+        linear-gradient(165deg, #07100c 0%, #0d1714 50%, #08120e 100%);
+      transition: opacity 0.55s ease, visibility 0.55s ease;
+    }
+    .splash.is-hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .splash__logo-wrap {
+      position: relative;
+      width: 168px;
+      height: 168px;
+      display: grid;
+      place-items: center;
+      animation: splashLogoIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    .splash__halo {
+      position: absolute;
+      inset: -22px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle, rgba(249, 115, 22, 0.45) 0%, rgba(249, 115, 22, 0) 60%),
+        radial-gradient(circle at 80% 80%, rgba(74, 222, 128, 0.32) 0%, rgba(74, 222, 128, 0) 60%);
+      filter: blur(14px);
+      animation: haloPulse 2.4s ease-in-out infinite;
+    }
+    .splash__ring {
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 1px solid rgba(249, 115, 22, 0.32);
+      box-shadow:
+        0 0 0 1px rgba(74, 222, 128, 0.14) inset,
+        0 0 40px rgba(249, 115, 22, 0.22);
+    }
+    .splash__ring--outer {
+      inset: -22px;
+      border-color: rgba(74, 222, 128, 0.18);
+      animation: ringSpin 14s linear infinite;
+      border-style: dashed;
+    }
+    .splash__logo {
+      position: relative;
+      width: 132px;
+      height: 132px;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center;
+      box-shadow:
+        0 18px 48px rgba(154, 52, 18, 0.45),
+        0 0 0 2px rgba(255, 247, 237, 0.06),
+        0 0 36px rgba(74, 222, 128, 0.22);
+      animation: logoFloat 3.6s ease-in-out infinite;
+    }
+    .splash__brand {
+      text-align: center;
+      animation: splashTextIn 0.9s 0.15s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .splash__brand h2 {
+      margin: 0;
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      background: linear-gradient(120deg, var(--accent-3) 0%, #fdba74 50%, var(--green) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 28px rgba(154, 52, 18, 0.35);
+    }
+    .splash__brand p {
+      margin: 0.35rem 0 0;
+      font-size: 0.72rem;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: rgba(232, 240, 248, 0.55);
+    }
+    .splash__bar {
+      position: relative;
+      width: min(260px, 60vw);
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.07);
+      overflow: hidden;
+      box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.4);
+    }
+    .splash__bar::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent-3) 0%, #fdba74 50%, var(--green) 100%);
+      box-shadow: 0 0 16px rgba(249, 115, 22, 0.55);
+      transform-origin: left center;
+      animation: barFill 3.2s 0.25s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+      transform: scaleX(0);
+    }
+    .splash__bar::after {
+      content: "";
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 60px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+      animation: barShine 3.2s 0.25s ease-in-out forwards;
+      transform: translateX(-100%);
+    }
+    @keyframes splashLogoIn {
+      from { opacity: 0; transform: scale(0.4) rotate(-8deg); }
+      to   { opacity: 1; transform: scale(1) rotate(0); }
+    }
+    @keyframes splashTextIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes haloPulse {
+      0%, 100% { opacity: 0.55; transform: scale(0.96); }
+      50%      { opacity: 1;    transform: scale(1.06); }
+    }
+    @keyframes ringSpin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes logoFloat {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-6px); }
+    }
+    @keyframes barFill {
+      0%   { transform: scaleX(0); }
+      100% { transform: scaleX(1); }
+    }
+    @keyframes barShine {
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(calc(min(260px, 60vw) + 60px)); }
+    }
+    /* Reveal the underlying app once splash finishes */
+    .layout {
+      opacity: 0;
+      transform: scale(0.985);
+      transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    body.app-ready .layout {
+      opacity: 1;
+      transform: scale(1);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .splash__logo, .splash__halo, .splash__ring--outer { animation: none; }
+      .splash__bar::before { animation-duration: 0.6s; }
+      .layout { transition: opacity 0.2s ease; transform: none; }
+    }
+
   </style>
 </head>
 <body>
+  <div class="splash" id="splash" role="status" aria-label="Loading BetMakini">
+    <div class="splash__logo-wrap">
+      <span class="splash__halo" aria-hidden="true"></span>
+      <span class="splash__ring splash__ring--outer" aria-hidden="true"></span>
+      <span class="splash__ring" aria-hidden="true"></span>
+      <img src="/betmakini-logo.jpg" alt="BetMakini" class="splash__logo" />
+    </div>
+    <div class="splash__brand">
+      <h2>BETMAKINI</h2>
+      <p>Notification system</p>
+    </div>
+    <div class="splash__bar" aria-hidden="true"></div>
+  </div>
+  <script>
+    (function () {
+      var splash = document.getElementById('splash');
+      if (!splash) return;
+      var hideAt = 3700; // ms — bar fills at ~3.45s, give a small buffer
+      function hide() {
+        document.body.classList.add('app-ready');
+        splash.classList.add('is-hidden');
+        setTimeout(function () { splash.parentNode && splash.parentNode.removeChild(splash); }, 700);
+      }
+      if (document.readyState === 'complete') {
+        setTimeout(hide, hideAt);
+      } else {
+        window.addEventListener('load', function () { setTimeout(hide, hideAt); });
+        // Safety fallback if load never fires
+        setTimeout(hide, hideAt + 3000);
+      }
+    })();
+  </script>
   <div class="ambient" aria-hidden="true"></div>
   <div class="layout">
     <header class="panel panel--hero">
-      <h1 id="siteTitle">BetMakini Notification</h1>
+      <h1 id="siteTitle">BETMAKINI</h1>
+      <p class="hero-tagline">Notification system</p>
       <div class="chips">
-        <div class="chip"><span>Topic</span> <strong id="topicDisplay">—</strong></div>
+        <div class="chip"><strong id="topicDisplay">Admin panel</strong></div>
         <div class="chip" id="tzChip" style="display:none;"><span>Time</span> <strong id="tzDisplay"></strong></div>
         <div class="chip" id="cronChip" style="display:none;"><span class="status-dot" id="cronDot"></span> Cron</div>
         <div class="chip" id="devOpenChip" style="display:none;"><span>API</span> <strong>open (dev)</strong></div>
@@ -494,9 +773,6 @@
       </div>
       <button type="button" class="primary" id="loginBtn">Sign in</button>
       <div id="loginOut" class="out"></div>
-      <button type="button" class="ghost" id="clearAdminKey" style="width:100%;margin-top:0.5rem;">
-        Logout
-      </button>
     </div>
 
     <section id="sendPanel" class="panel" hidden aria-hidden="true">
@@ -514,6 +790,17 @@
         <button type="submit" class="primary" id="btn">Send now</button>
       </form>
       <div id="out" class="out" aria-live="polite"></div>
+      <div id="successCard" class="success-card" role="status" aria-live="polite" hidden>
+        <div class="success-card__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12.5l4.5 4.5L19 7.5"></path>
+          </svg>
+        </div>
+        <div class="success-card__body">
+          <p class="success-card__title">Notification sent successfully</p>
+          <p class="success-card__sub" id="successCardSub">Your message has been delivered.</p>
+        </div>
+      </div>
       <button type="button" class="ghost ghost--logout" id="bottomLogoutBtn" style="margin-top:1rem;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -726,9 +1013,9 @@
       .then((j) => {
         if (!j) return;
         meta = j;
-        document.getElementById('siteTitle').textContent = j.siteName || 'BetMakini Notification';
-        document.title = j.siteName || 'BetMakini Notification';
-        document.getElementById('topicDisplay').textContent = j.topic || '—';
+        document.getElementById('siteTitle').textContent = 'BETMAKINI';
+        document.title = 'BetMakini Notification system';
+        document.getElementById('topicDisplay').textContent = 'Admin panel';
         if (SHOW_SCHEDULE_UI && j.scheduleTz) {
           document.getElementById('tzChip').style.display = 'inline-flex';
           document.getElementById('tzDisplay').textContent = j.scheduleTz;
@@ -846,7 +1133,6 @@
       applyLoginGate();
       updateAuthGates();
     }
-    document.getElementById('clearAdminKey').addEventListener('click', performLogout);
     const bottomLogoutBtn = document.getElementById('bottomLogoutBtn');
     if (bottomLogoutBtn) bottomLogoutBtn.addEventListener('click', () => {
       performLogout();
@@ -862,8 +1148,32 @@
       });
     }
 
+    const successCard = document.getElementById('successCard');
+    const successCardSub = document.getElementById('successCardSub');
+    let successHideTimer = null;
+
+    function hideSuccessCard() {
+      if (successCard) successCard.hidden = true;
+      if (successHideTimer) { clearTimeout(successHideTimer); successHideTimer = null; }
+    }
+
+    function showSuccessCard(title, body) {
+      if (!successCard) return;
+      const preview = (title || body || '').trim();
+      successCardSub.textContent = preview
+        ? (preview.length > 110 ? preview.slice(0, 109) + '…' : preview)
+        : 'Your message has been delivered.';
+      successCard.hidden = false;
+      successCard.style.animation = 'none';
+      void successCard.offsetWidth;
+      successCard.style.animation = '';
+      if (successHideTimer) clearTimeout(successHideTimer);
+      successHideTimer = setTimeout(() => { successCard.hidden = true; }, 6000);
+    }
+
     document.getElementById('f').addEventListener('submit', async (e) => {
       e.preventDefault();
+      hideSuccessCard();
       if (!sendScheduleAllowed()) {
         out.className = 'out err';
         out.textContent = meta.adminSecretMissing
@@ -884,17 +1194,18 @@
           body: JSON.stringify({ title, body, image }),
         });
         const text = await res.text();
-        let msg = text;
-        try {
-          const j = JSON.parse(text);
-          msg = j.error || j.message || JSON.stringify(j, null, 2);
-        } catch (_) {}
+        let parsed = null;
+        try { parsed = JSON.parse(text); } catch (_) {}
         if (res.ok) {
-          out.className = 'out ok';
-          out.textContent = 'Success:\n' + msg;
+          // Technical details run silently in the background (logged for debugging only)
+          if (parsed) console.debug('[notify] send ok:', parsed);
+          showSuccessCard(title, body);
+          out.textContent = '';
+          out.className = 'out';
         } else {
+          const errMsg = (parsed && (parsed.error || parsed.message)) || text || 'Unknown error';
           out.className = 'out err';
-          out.textContent = 'Error (' + res.status + '):\n' + msg;
+          out.textContent = 'Error (' + res.status + '): ' + errMsg;
         }
       } catch (err) {
         out.className = 'out err';
