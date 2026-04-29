@@ -580,9 +580,6 @@
       </div>
       <button type="button" class="primary" id="loginBtn">Sign in</button>
       <div id="loginOut" class="out"></div>
-      <button type="button" class="ghost" id="clearAdminKey" style="width:100%;margin-top:0.5rem;">
-        Logout
-      </button>
     </div>
 
     <section id="sendPanel" class="panel" hidden aria-hidden="true">
@@ -943,7 +940,6 @@
       applyLoginGate();
       updateAuthGates();
     }
-    document.getElementById('clearAdminKey').addEventListener('click', performLogout);
     const bottomLogoutBtn = document.getElementById('bottomLogoutBtn');
     if (bottomLogoutBtn) bottomLogoutBtn.addEventListener('click', () => {
       performLogout();
