@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>BetMakini Notification</title>
+  <title>BetMakini Notification system</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -122,16 +122,41 @@
       opacity: 0.75;
     }
     .panel--hero h1 {
-      margin: 0 0 0.45rem;
-      font-size: 1.75rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
+      margin: 0;
+      font-size: 2.05rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
       background: linear-gradient(120deg, var(--accent-3) 0%, #fdba74 45%, var(--green) 100%);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
       text-shadow: 0 0 38px rgba(154, 52, 18, 0.32);
     }
+    .hero-tagline {
+      margin: 0.35rem 0 1rem;
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(232, 240, 248, 0.55);
+      position: relative;
+      display: inline-block;
+      padding: 0 0.9rem;
+    }
+    .hero-tagline::before,
+    .hero-tagline::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 22px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(74, 222, 128, 0.45));
+    }
+    .hero-tagline::before {
+      right: 100%;
+      background: linear-gradient(90deg, transparent, rgba(249, 115, 22, 0.45));
+    }
+    .hero-tagline::after { left: 100%; }
     .panel--auth {
       border-color: rgba(249, 115, 22, 0.36);
       background:
@@ -498,7 +523,8 @@
   <div class="ambient" aria-hidden="true"></div>
   <div class="layout">
     <header class="panel panel--hero">
-      <h1 id="siteTitle">BetMakini Notification</h1>
+      <h1 id="siteTitle">BETMAKINI</h1>
+      <p class="hero-tagline">Notification system</p>
       <div class="chips">
         <div class="chip"><span>Topic</span> <strong id="topicDisplay">—</strong></div>
         <div class="chip" id="tzChip" style="display:none;"><span>Time</span> <strong id="tzDisplay"></strong></div>
@@ -797,8 +823,8 @@
       .then((j) => {
         if (!j) return;
         meta = j;
-        document.getElementById('siteTitle').textContent = 'BetMakini Notification';
-        document.title = 'BetMakini Notification';
+        document.getElementById('siteTitle').textContent = 'BETMAKINI';
+        document.title = 'BetMakini Notification system';
         document.getElementById('topicDisplay').textContent = j.topic || '—';
         if (SHOW_SCHEDULE_UI && j.scheduleTz) {
           document.getElementById('tzChip').style.display = 'inline-flex';
