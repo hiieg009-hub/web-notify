@@ -797,8 +797,8 @@
       .then((j) => {
         if (!j) return;
         meta = j;
-        document.getElementById('siteTitle').textContent = j.siteName || 'BetMakini Notification';
-        document.title = j.siteName || 'BetMakini Notification';
+        document.getElementById('siteTitle').textContent = 'BetMakini Notification';
+        document.title = 'BetMakini Notification';
         document.getElementById('topicDisplay').textContent = j.topic || '—';
         if (SHOW_SCHEDULE_UI && j.scheduleTz) {
           document.getElementById('tzChip').style.display = 'inline-flex';
