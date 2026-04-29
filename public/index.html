@@ -344,12 +344,68 @@
       background: rgba(120, 40, 40, 0.15);
     }
     .panel--warn h2 { color: var(--err); }
+
+    .top-actions {
+      position: absolute;
+      top: 0.7rem;
+      right: 0.7rem;
+      display: flex;
+      gap: 0.4rem;
+      z-index: 2;
+    }
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(0, 0, 0, 0.35);
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .icon-btn svg { width: 16px; height: 16px; }
+    .icon-btn:hover {
+      background: rgba(234, 88, 12, 0.18);
+      border-color: rgba(234, 88, 12, 0.5);
+      color: var(--accent-2);
+    }
+    .icon-btn--logout:hover {
+      background: rgba(242, 164, 164, 0.14);
+      border-color: rgba(242, 164, 164, 0.45);
+      color: var(--err);
+    }
+    .icon-btn:active { transform: scale(0.94); }
+    .icon-btn[hidden] { display: none; }
+    .icon-btn.spinning svg { animation: iconSpin 0.7s linear infinite; }
+    @keyframes iconSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
   <div class="ambient" aria-hidden="true"></div>
   <div class="layout">
     <header class="panel panel--hero">
+      <div class="top-actions">
+        <button type="button" class="icon-btn" id="refreshBtn" aria-label="Refresh" title="Refresh">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12a9 9 0 1 1-3-6.7"></path>
+            <polyline points="21 4 21 10 15 10"></polyline>
+          </svg>
+        </button>
+        <button type="button" class="icon-btn icon-btn--logout" id="topLogoutBtn" aria-label="Logout" title="Logout" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </button>
+      </div>
       <h1 id="siteTitle">Notifications</h1>
       <p class="sub" id="siteSub">FCM notifications — send now</p>
       <div class="chips">
@@ -507,6 +563,9 @@
       else sendPanel.setAttribute('aria-hidden', 'true');
 
       if (needs) adminWrap.hidden = adminAuthenticated;
+
+      const topLogout = document.getElementById('topLogoutBtn');
+      if (topLogout) topLogout.hidden = !(needs && adminAuthenticated);
     }
 
     async function verifyAdminSecret(secret) {
@@ -741,7 +800,7 @@
       });
     }
 
-    document.getElementById('clearAdminKey').addEventListener('click', () => {
+    function performLogout() {
       sessionStorage.removeItem(ADMIN_KEY);
       adminInput.value = '';
       adminAuthenticated = false;
@@ -749,7 +808,19 @@
       loginOut.textContent = '';
       applyLoginGate();
       updateAuthGates();
-    });
+    }
+    document.getElementById('clearAdminKey').addEventListener('click', performLogout);
+    const topLogoutBtn = document.getElementById('topLogoutBtn');
+    if (topLogoutBtn) topLogoutBtn.addEventListener('click', performLogout);
+
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', () => {
+        refreshBtn.classList.add('spinning');
+        refreshBtn.disabled = true;
+        setTimeout(() => window.location.reload(), 250);
+      });
+    }
 
     if (SHOW_SCHEDULE_UI) {
       document.getElementById('sMode').addEventListener('change', () => {
