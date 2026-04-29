@@ -400,6 +400,66 @@
     }
     .out.err { color: var(--err); border-color: rgba(242, 164, 164, 0.3); background: rgba(180, 60, 60, 0.1); }
     .out.ok { color: var(--ok); border-color: rgba(74, 222, 128, 0.32); background: rgba(34, 197, 94, 0.08); }
+    .success-card {
+      margin-top: 1rem;
+      padding: 1.15rem 1.1rem;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      gap: 0.95rem;
+      background:
+        radial-gradient(120% 80% at 0% 0%, rgba(34, 197, 94, 0.22), transparent 60%),
+        linear-gradient(180deg, rgba(34, 197, 94, 0.14), rgba(34, 197, 94, 0.04));
+      border: 1px solid rgba(74, 222, 128, 0.42);
+      box-shadow:
+        0 10px 30px rgba(34, 197, 94, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      animation: successPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes successPop {
+      from { opacity: 0; transform: translateY(8px) scale(0.96); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .success-card__icon {
+      flex: 0 0 auto;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--green-2), var(--green));
+      box-shadow: 0 0 24px var(--green-glow), inset 0 1px 0 rgba(255, 255, 255, 0.32);
+      color: #06140a;
+    }
+    .success-card__icon svg { width: 24px; height: 24px; }
+    .success-card__icon svg path {
+      stroke-dasharray: 32;
+      stroke-dashoffset: 32;
+      animation: drawCheck 0.55s 0.15s ease-out forwards;
+    }
+    @keyframes drawCheck {
+      to { stroke-dashoffset: 0; }
+    }
+    .success-card__body { flex: 1 1 auto; min-width: 0; }
+    .success-card__title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #ecfdf5;
+      letter-spacing: -0.005em;
+      margin: 0 0 0.2rem;
+    }
+    .success-card__sub {
+      font-size: 0.82rem;
+      color: rgba(220, 252, 231, 0.72);
+      line-height: 1.45;
+      margin: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .success-card[hidden] { display: none; }
     .hint { font-size: 0.72rem; color: var(--muted); margin: -0.35rem 0 1rem; line-height: 1.4; }
     .panel code {
       font-size: 0.8em;
@@ -514,6 +574,17 @@
         <button type="submit" class="primary" id="btn">Send now</button>
       </form>
       <div id="out" class="out" aria-live="polite"></div>
+      <div id="successCard" class="success-card" role="status" aria-live="polite" hidden>
+        <div class="success-card__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12.5l4.5 4.5L19 7.5"></path>
+          </svg>
+        </div>
+        <div class="success-card__body">
+          <p class="success-card__title">Notification sent successfully</p>
+          <p class="success-card__sub" id="successCardSub">Your message has been delivered.</p>
+        </div>
+      </div>
       <button type="button" class="ghost ghost--logout" id="bottomLogoutBtn" style="margin-top:1rem;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -862,8 +933,32 @@
       });
     }
 
+    const successCard = document.getElementById('successCard');
+    const successCardSub = document.getElementById('successCardSub');
+    let successHideTimer = null;
+
+    function hideSuccessCard() {
+      if (successCard) successCard.hidden = true;
+      if (successHideTimer) { clearTimeout(successHideTimer); successHideTimer = null; }
+    }
+
+    function showSuccessCard(title, body) {
+      if (!successCard) return;
+      const preview = (title || body || '').trim();
+      successCardSub.textContent = preview
+        ? (preview.length > 110 ? preview.slice(0, 109) + '…' : preview)
+        : 'Your message has been delivered.';
+      successCard.hidden = false;
+      successCard.style.animation = 'none';
+      void successCard.offsetWidth;
+      successCard.style.animation = '';
+      if (successHideTimer) clearTimeout(successHideTimer);
+      successHideTimer = setTimeout(() => { successCard.hidden = true; }, 6000);
+    }
+
     document.getElementById('f').addEventListener('submit', async (e) => {
       e.preventDefault();
+      hideSuccessCard();
       if (!sendScheduleAllowed()) {
         out.className = 'out err';
         out.textContent = meta.adminSecretMissing
@@ -884,17 +979,18 @@
           body: JSON.stringify({ title, body, image }),
         });
         const text = await res.text();
-        let msg = text;
-        try {
-          const j = JSON.parse(text);
-          msg = j.error || j.message || JSON.stringify(j, null, 2);
-        } catch (_) {}
+        let parsed = null;
+        try { parsed = JSON.parse(text); } catch (_) {}
         if (res.ok) {
-          out.className = 'out ok';
-          out.textContent = 'Success:\n' + msg;
+          // Technical details run silently in the background (logged for debugging only)
+          if (parsed) console.debug('[notify] send ok:', parsed);
+          showSuccessCard(title, body);
+          out.textContent = '';
+          out.className = 'out';
         } else {
+          const errMsg = (parsed && (parsed.error || parsed.message)) || text || 'Unknown error';
           out.className = 'out err';
-          out.textContent = 'Error (' + res.status + '):\n' + msg;
+          out.textContent = 'Error (' + res.status + '): ' + errMsg;
         }
       } catch (err) {
         out.className = 'out err';
