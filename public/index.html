@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sw">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -351,20 +351,20 @@
   <div class="layout">
     <header class="panel panel--hero">
       <h1 id="siteTitle">Notifications</h1>
-      <p class="sub" id="siteSub">Arifa za FCM — tuma sasa</p>
+      <p class="sub" id="siteSub">FCM notifications — send now</p>
       <div class="chips">
         <div class="chip"><span>Topic</span> <strong id="topicDisplay">—</strong></div>
-        <div class="chip" id="tzChip" style="display:none;"><span>Muda</span> <strong id="tzDisplay"></strong></div>
+        <div class="chip" id="tzChip" style="display:none;"><span>Time</span> <strong id="tzDisplay"></strong></div>
         <div class="chip" id="cronChip" style="display:none;"><span class="status-dot" id="cronDot"></span> Cron</div>
-        <div class="chip" id="devOpenChip" style="display:none;"><span>API</span> <strong>wazi (dev)</strong></div>
+        <div class="chip" id="devOpenChip" style="display:none;"><span>API</span> <strong>open (dev)</strong></div>
       </div>
     </header>
 
     <div id="serverMisconfig" class="panel panel--warn" style="display:none;">
-      <h2>Seva haijasanidiwa</h2>
+      <h2>Server not configured</h2>
       <p class="hint" style="margin-top:0;color:var(--text);">
-        Hakuna <code>ADMIN_SECRET</code> kwenye mazingira ya server. Ongeza kwenye <code>.env.local</code> kisha anzisha upya <code>npm run dev</code>.
-        Kwa jaribio bila nenosiri (ndani tu): weka <code>ADMIN_AUTH_OPEN=1</code> — <strong>usitumie production</strong>.
+        No <code>ADMIN_SECRET</code> set in the server environment. Add it to <code>.env.local</code> then restart with <code>npm run dev</code>.
+        For local testing without a password (dev only): set <code>ADMIN_AUTH_OPEN=1</code> — <strong>do not use in production</strong>.
       </p>
     </div>
 
@@ -378,11 +378,11 @@
           </svg>
         </div>
         <div class="auth-text">
-          <h2>Ingia kwanza</h2>
-          <span class="auth-sub">Weka nenosiri la admin ili kuendelea</span>
+          <h2>Sign in first</h2>
+          <span class="auth-sub">Enter the admin password to continue</span>
         </div>
       </div>
-      <label for="adminKey">Nenosiri la admin</label>
+      <label for="adminKey">Admin password</label>
       <div class="pwd-field">
         <span class="pwd-leading" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -391,8 +391,8 @@
             <circle cx="9" cy="15" r="5"></circle>
           </svg>
         </span>
-        <input id="adminKey" type="password" placeholder="Weka password hapa" autocomplete="current-password" />
-        <button type="button" class="pwd-toggle" id="pwdToggle" aria-label="Onyesha nenosiri" aria-pressed="false">
+        <input id="adminKey" type="password" placeholder="Enter password here" autocomplete="current-password" />
+        <button type="button" class="pwd-toggle" id="pwdToggle" aria-label="Show password" aria-pressed="false">
           <svg id="pwdEyeOn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
             <circle cx="12" cy="12" r="3"></circle>
@@ -405,7 +405,7 @@
           </svg>
         </button>
       </div>
-      <button type="button" class="primary" id="loginBtn">Ingia</button>
+      <button type="button" class="primary" id="loginBtn">Sign in</button>
       <div id="loginOut" class="out" style="min-height:1rem;"></div>
       <button type="button" class="ghost" id="clearAdminKey" style="width:100%;margin-top:0.5rem;">
         Logout
@@ -413,60 +413,60 @@
     </div>
 
     <section id="sendPanel" class="panel" hidden aria-hidden="true">
-      <h2>Tuma sasa</h2>
+      <h2>Send now</h2>
       <p id="sendGateHint" class="hint" style="display:none;margin-top:0;">
-        Weka nenosiri la admin hapo juu kabla ya kutuma. Kivinjari kinaweza kuikumbuka katika tab hii (sessionStorage).
+        Enter the admin password above before sending. The browser may remember it in this tab (sessionStorage).
       </p>
       <form id="f">
-        <label for="title">Kichwa</label>
-        <input id="title" type="text" placeholder="Hiari" autocomplete="off" />
-        <label for="body">Maelezo</label>
-        <textarea id="body" placeholder="Hiari"></textarea>
-        <label for="image">Kiungo cha picha</label>
+        <label for="title">Title</label>
+        <input id="title" type="text" placeholder="Optional" autocomplete="off" />
+        <label for="body">Message</label>
+        <textarea id="body" placeholder="Optional"></textarea>
+        <label for="image">Image URL</label>
         <input id="image" type="url" placeholder="https://..." autocomplete="off" />
-        <button type="submit" class="primary" id="btn">Tuma sasa</button>
+        <button type="submit" class="primary" id="btn">Send now</button>
       </form>
       <div id="out" class="out" aria-live="polite"></div>
     </section>
 
-    <!-- Ratiba: imefichwa kwenye UI (API /api/schedule bado ipo kwa matumizi ya ndani / baadaye). Weka SHOW_SCHEDULE_UI = true kwenye script kuirudisha. -->
+    <!-- Schedule: hidden in the UI (the /api/schedule endpoint still exists for internal/future use). Set SHOW_SCHEDULE_UI = true in the script to bring it back. -->
     <section id="schedPanelSection" class="panel" hidden aria-hidden="true">
-      <h2 id="schedPanelTitle">Ratiba</h2>
+      <h2 id="schedPanelTitle">Schedule</h2>
       <p id="schedIntro" class="hint" style="margin-top:0;">
-        Mara moja au kila siku (saa kwa <span id="tzHint">TZ</span>).
-        <strong>Ratiba</strong> inatekelezwa na server kila dakika — sio kitufe cha &quot;Tuma sasa&quot;.
+        Once or daily (time in <span id="tzHint">TZ</span>).
+        The <strong>schedule</strong> is run by the server every minute — not by the &quot;Send now&quot; button.
       </p>
       <p id="schedEphemeralNote" class="hint" style="display:none;margin-top:0;">
-        Kwenye seva hii ratiba haiwezi kuhifadhiwa kudumu (mfano Vercel: hifadhi ni ya muda mfupi), kwa hiyo
-        baada ya kuonyesha upya ukurasa orodha inaonekana tupu hata ukiwa umehifadhi kabla.
-        Tumia fomu hapa chini kutuma arifa <strong>mara moja</strong> — kazi sawa na &quot;Tuma sasa&quot; juu.
+        On this server, schedules cannot be persisted (e.g. on Vercel storage is ephemeral), so
+        after you refresh the page the list will appear empty even if you saved before.
+        Use the form below to send a notification <strong>once</strong> — it works the same as &quot;Send now&quot; above.
       </p>
       <p id="cronHint" class="cron-hint" style="display:none;"></p>
 
       <form id="schedForm">
-        <label for="sTitle">Kichwa</label>
-        <input id="sTitle" type="text" placeholder="Hiari" />
-        <label for="sBody">Maelezo</label>
-        <textarea id="sBody" placeholder="Hiari"></textarea>
-        <label for="sImage">Picha URL</label>
+        <label for="sTitle">Title</label>
+        <input id="sTitle" type="text" placeholder="Optional" />
+        <label for="sBody">Message</label>
+        <textarea id="sBody" placeholder="Optional"></textarea>
+        <label for="sImage">Image URL</label>
         <input id="sImage" type="url" placeholder="https://..." />
-        <!-- Ratiba ya JSON (mara moja / kila siku): inapatikana tu wakati schedulePersistent === true (faili ya kudumu). -->
+        <!-- JSON-based schedule (once / daily): only available when schedulePersistent === true (persistent storage). -->
         <div id="schedTimingWrap">
-          <label for="sMode">Aina</label>
+          <label for="sMode">Type</label>
           <select id="sMode">
-            <option value="once">Mara moja</option>
-            <option value="daily">Kila siku</option>
+            <option value="once">Once</option>
+            <option value="daily">Daily</option>
           </select>
           <div id="onceFields">
-            <label for="sRunAt">Tarehe na saa</label>
+            <label for="sRunAt">Date and time</label>
             <input id="sRunAt" type="datetime-local" />
           </div>
           <div id="dailyFields" style="display:none;">
-            <label for="sDailyTime">Saa</label>
+            <label for="sDailyTime">Time</label>
             <input id="sDailyTime" type="time" />
           </div>
         </div>
-        <button type="submit" class="primary" id="schedBtn">Ongeza ratiba</button>
+        <button type="submit" class="primary" id="schedBtn">Add schedule</button>
       </form>
       <div id="schedOut" class="out" style="min-height:1rem;"></div>
       <div id="schedListWrap">
@@ -476,7 +476,7 @@
   </div>
 
   <script>
-    /** Weka true kurudisha paneli ya ratiba kwenye UI. */
+    /** Set to true to bring the schedule panel back to the UI. */
     const SHOW_SCHEDULE_UI = false;
 
     const ADMIN_KEY = 'webNotifyAdminSecret';
@@ -523,11 +523,11 @@
       const secret = (adminInput.value || '').trim();
       if (!secret) {
         loginOut.className = 'out err';
-        loginOut.textContent = 'Weka nenosiri la admin.';
+        loginOut.textContent = 'Enter the admin password.';
         return;
       }
       loginOut.className = 'out';
-      loginOut.textContent = 'Inathibitisha...';
+      loginOut.textContent = 'Verifying...';
       loginBtn.disabled = true;
       try {
         const ok = await verifyAdminSecret(secret);
@@ -535,7 +535,7 @@
           adminAuthenticated = false;
           sessionStorage.removeItem(ADMIN_KEY);
           loginOut.className = 'out err';
-          loginOut.textContent = 'Nenosiri si sahihi.';
+          loginOut.textContent = 'Incorrect password.';
           applyLoginGate();
           updateAuthGates();
           return;
@@ -543,12 +543,12 @@
         adminAuthenticated = true;
         sessionStorage.setItem(ADMIN_KEY, secret);
         loginOut.className = 'out ok';
-        loginOut.textContent = 'Umeingia.';
+        loginOut.textContent = 'Signed in.';
         applyLoginGate();
         updateAuthGates();
       } catch (err) {
         loginOut.className = 'out err';
-        loginOut.textContent = 'Mtandao: ' + (err && err.message ? err.message : String(err));
+        loginOut.textContent = 'Network: ' + (err && err.message ? err.message : String(err));
       }
       loginBtn.disabled = false;
     }
@@ -571,8 +571,8 @@
       if (listWrap) listWrap.style.display = persistent ? 'block' : 'none';
       if (intro) intro.style.display = persistent ? 'block' : 'none';
       if (ephem) ephem.style.display = persistent ? 'none' : 'block';
-      if (titleEl) titleEl.textContent = persistent ? 'Ratiba' : 'Tuma sasa';
-      schedBtn.textContent = persistent ? 'Ongeza ratiba' : 'Tuma sasa';
+      if (titleEl) titleEl.textContent = persistent ? 'Schedule' : 'Send now';
+      schedBtn.textContent = persistent ? 'Add schedule' : 'Send now';
       if (!persistent && cronHint) cronHint.style.display = 'none';
     }
 
@@ -580,7 +580,7 @@
       return (adminInput.value || sessionStorage.getItem(ADMIN_KEY) || '').trim().length > 0;
     }
 
-    /** Tuma (na ratiba ikiwa imeonyeshwa) vinaweza kutumika kwenye kivinjari */
+    /** Whether send (and schedule, if shown) is usable from the browser */
     function sendScheduleAllowed() {
       if (!meta || meta.adminAuthOpen) return true;
       if (meta.adminSecretMissing) return false;
@@ -675,15 +675,15 @@
               cronDot.classList.add('off');
               cronHint.style.display = 'block';
               cronHint.textContent = isLocal
-                ? 'PC: ratiba hutekelezwa kila dakika na server. Maelezo ya CRON / ADMIN: soma README.md kwenye repo.'
-                : 'Weka CRON_SECRET sawa .env na Vercel. Kiungo cha cron: https://<domain-yako>/api/cron — maelezo kamili README.md.';
+                ? 'PC: schedule is run every minute by the server. CRON / ADMIN details: see README.md in the repo.'
+                : 'Set CRON_SECRET in both .env and on Vercel. Cron URL: https://<your-domain>/api/cron — full details in README.md.';
             }
           }
         } else {
           cronChip.style.display = 'none';
         }
 
-        // Kama kuna siri iliyohifadhiwa kwenye session, thibitisha kisha ingiza moja kwa moja.
+        // If a secret is stored in session, verify it and sign in automatically.
         if (needsBrowserAdmin()) {
           const cached = (sessionStorage.getItem(ADMIN_KEY) || '').trim();
           if (cached) {
@@ -694,7 +694,7 @@
                 if (!ok) sessionStorage.removeItem(ADMIN_KEY);
                 if (!ok) {
                   loginOut.className = 'out err';
-                  loginOut.textContent = 'Session ya login imeisha, ingia tena.';
+                  loginOut.textContent = 'Login session expired, please sign in again.';
                 }
                 applyLoginGate();
                 updateAuthGates();
@@ -735,7 +735,7 @@
         const showing = adminInput.type === 'text';
         adminInput.type = showing ? 'password' : 'text';
         pwdToggleBtn.setAttribute('aria-pressed', String(!showing));
-        pwdToggleBtn.setAttribute('aria-label', showing ? 'Onyesha nenosiri' : 'Ficha nenosiri');
+        pwdToggleBtn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
         if (pwdEyeOn) pwdEyeOn.style.display = showing ? '' : 'none';
         if (pwdEyeOff) pwdEyeOff.style.display = showing ? 'none' : '';
       });
@@ -764,8 +764,8 @@
       if (!sendScheduleAllowed()) {
         out.className = 'out err';
         out.textContent = meta.adminSecretMissing
-          ? 'Seva haina ADMIN_SECRET — weka kwenye .env.local kisha anzisha upya server.'
-          : 'Weka kwanza nenosiri la admin hapo juu.';
+          ? 'Server has no ADMIN_SECRET — set it in .env.local and restart the server.'
+          : 'Enter the admin password above first.';
         return;
       }
       out.textContent = '';
@@ -788,14 +788,14 @@
         } catch (_) {}
         if (res.ok) {
           out.className = 'out ok';
-          out.textContent = 'Imefanikiwa:\n' + msg;
+          out.textContent = 'Success:\n' + msg;
         } else {
           out.className = 'out err';
-          out.textContent = 'Hitilafu (' + res.status + '):\n' + msg;
+          out.textContent = 'Error (' + res.status + '):\n' + msg;
         }
       } catch (err) {
         out.className = 'out err';
-        out.textContent = 'Mtandao: ' + (err && err.message ? err.message : String(err));
+        out.textContent = 'Network: ' + (err && err.message ? err.message : String(err));
       }
       btn.disabled = false;
     });
@@ -815,7 +815,7 @@
         }
         const items = j.items || [];
         if (items.length === 0) {
-          schedList.innerHTML = '<p class="hint">Hakuna ratiba bado.</p>';
+          schedList.innerHTML = '<p class="hint">No schedules yet.</p>';
           return;
         }
         items
@@ -828,29 +828,29 @@
             el.dataset.enabled = it.enabled ? '1' : '0';
             const when =
               it.mode === 'once'
-                ? 'Mara moja: ' + (it.runAt || '—')
-                : 'Kila siku: ' +
+                ? 'Once: ' + (it.runAt || '—')
+                : 'Daily: ' +
                   String(it.hour ?? 0).padStart(2, '0') +
                   ':' +
                   String(it.minute ?? 0).padStart(2, '0');
             const preview = (it.body || '').slice(0, 120);
             el.innerHTML =
               '<strong>' +
-              escapeHtml(it.title || '(bila kichwa)') +
+              escapeHtml(it.title || '(no title)') +
               '</strong><br/>' +
               escapeHtml(preview) +
               (it.body && it.body.length > 120 ? '…' : '') +
               '<br/><span class="hint">' +
               escapeHtml(when) +
               ' · ' +
-              (it.enabled ? 'washa' : 'zima') +
-              (it.lastSentAt ? ' · mwisho: ' + escapeHtml(it.lastSentAt) : '') +
+              (it.enabled ? 'on' : 'off') +
+              (it.lastSentAt ? ' · last: ' + escapeHtml(it.lastSentAt) : '') +
               '</span>' +
               '<div class="sched-actions">' +
               '<button type="button" class="ghost" data-act="toggle">' +
-              (it.enabled ? 'Zima' : 'Washa') +
+              (it.enabled ? 'Disable' : 'Enable') +
               '</button>' +
-              '<button type="button" class="danger-ghost" data-act="delete">Futa</button></div>';
+              '<button type="button" class="danger-ghost" data-act="delete">Delete</button></div>';
             schedList.appendChild(el);
           });
         schedList.querySelectorAll('button[data-act]').forEach((b) => {
@@ -899,8 +899,8 @@
         if (!sendScheduleAllowed()) {
           schedOut.className = 'out err';
           schedOut.textContent = meta.adminSecretMissing
-            ? 'Seva haina ADMIN_SECRET — weka kwenye .env.local kisha anzisha upya server.'
-            : 'Weka kwanza nenosiri la admin hapo juu.';
+            ? 'Server has no ADMIN_SECRET — set it in .env.local and restart the server.'
+            : 'Enter the admin password above first.';
           return;
         }
         schedOut.textContent = '';
@@ -925,14 +925,14 @@
             } catch (_) {}
             if (res.ok) {
               schedOut.className = 'out ok';
-              schedOut.textContent = 'Imefanikiwa:\n' + msg;
+              schedOut.textContent = 'Success:\n' + msg;
             } else {
               schedOut.className = 'out err';
-              schedOut.textContent = 'Hitilafu (' + res.status + '):\n' + msg;
+              schedOut.textContent = 'Error (' + res.status + '):\n' + msg;
             }
           } catch (err) {
             schedOut.className = 'out err';
-            schedOut.textContent = 'Mtandao: ' + (err && err.message ? err.message : String(err));
+            schedOut.textContent = 'Network: ' + (err && err.message ? err.message : String(err));
           }
           schedBtn.disabled = false;
           return;
@@ -947,7 +947,7 @@
           const local = document.getElementById('sRunAt').value;
           if (!local) {
             schedOut.className = 'out err';
-            schedOut.textContent = 'Chagua tarehe na saa.';
+            schedOut.textContent = 'Pick a date and time.';
             return;
           }
           payload.runAt = new Date(local).toISOString();
@@ -955,7 +955,7 @@
           const t = document.getElementById('sDailyTime').value;
           if (!t) {
             schedOut.className = 'out err';
-            schedOut.textContent = 'Chagua saa.';
+            schedOut.textContent = 'Pick a time.';
             return;
           }
           payload.dailyTime = t.length === 5 ? t : t.slice(0, 5);
@@ -973,7 +973,7 @@
             return;
           }
           schedOut.className = 'out ok';
-          schedOut.textContent = 'Imehifadhiwa.';
+          schedOut.textContent = 'Saved.';
           document.getElementById('schedForm').reset();
           document.getElementById('sMode').value = mode;
           document.getElementById('sMode').dispatchEvent(new Event('change'));
