@@ -14,10 +14,11 @@
       --glass-highlight: rgba(255, 255, 255, 0.09);
       --text: #f3f7fb;
       --muted: rgba(232, 240, 248, 0.6);
-      --accent: #ea580c;
-      --accent-2: #fb923c;
-      --accent-soft: rgba(234, 88, 12, 0.16);
-      --accent-glow: rgba(249, 115, 22, 0.5);
+      --accent: #9a3412;
+      --accent-2: #c2410c;
+      --accent-3: #ea580c;
+      --accent-soft: rgba(154, 52, 18, 0.22);
+      --accent-glow: rgba(154, 52, 18, 0.55);
       --green: #4ade80;
       --green-2: #22c55e;
       --green-soft: rgba(34, 197, 94, 0.14);
@@ -42,9 +43,9 @@
       inset: 0;
       z-index: 0;
       background:
-        radial-gradient(ellipse 80% 60% at 12% 6%, rgba(249, 115, 22, 0.42), transparent 55%),
+        radial-gradient(ellipse 80% 60% at 12% 6%, rgba(154, 52, 18, 0.55), transparent 55%),
         radial-gradient(ellipse 75% 55% at 92% 18%, rgba(34, 197, 94, 0.32), transparent 55%),
-        radial-gradient(ellipse 90% 60% at 50% 100%, rgba(234, 88, 12, 0.22), transparent 55%),
+        radial-gradient(ellipse 90% 60% at 50% 100%, rgba(194, 65, 12, 0.32), transparent 55%),
         radial-gradient(ellipse 70% 55% at 8% 95%, rgba(74, 222, 128, 0.18), transparent 55%),
         linear-gradient(165deg, #07100c 0%, #0d1714 50%, #08120e 100%);
       pointer-events: none;
@@ -85,17 +86,17 @@
         inset 0 1px 0 var(--glass-highlight);
     }
     .panel--hero {
-      padding: 1.85rem 1.4rem 1.55rem;
+      padding: 3.6rem 1.4rem 1.55rem;
       text-align: center;
-      border-color: rgba(249, 115, 22, 0.32);
+      border-color: rgba(154, 52, 18, 0.45);
       background:
-        radial-gradient(120% 80% at 0% 0%, rgba(249, 115, 22, 0.18), transparent 55%),
-        radial-gradient(120% 80% at 100% 0%, rgba(74, 222, 128, 0.14), transparent 55%),
+        radial-gradient(120% 80% at 0% 0%, rgba(154, 52, 18, 0.32), transparent 55%),
+        radial-gradient(120% 80% at 100% 0%, rgba(34, 197, 94, 0.18), transparent 55%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015)),
         var(--glass-bg);
       box-shadow:
-        0 10px 40px rgba(234, 88, 12, 0.18),
-        0 6px 28px rgba(0, 0, 0, 0.34),
+        0 10px 40px rgba(154, 52, 18, 0.32),
+        0 6px 28px rgba(0, 0, 0, 0.4),
         inset 0 1px 0 var(--glass-highlight),
         0 0 0 1px rgba(74, 222, 128, 0.08);
       overflow: hidden;
@@ -105,7 +106,7 @@
       position: absolute;
       top: 0; left: 0; right: 0;
       height: 2px;
-      background: linear-gradient(90deg, transparent, var(--accent) 25%, #fde68a 50%, var(--green) 75%, transparent);
+      background: linear-gradient(90deg, transparent, var(--accent) 25%, var(--accent-3) 50%, var(--green) 75%, transparent);
       opacity: 0.95;
       filter: blur(0.2px);
     }
@@ -116,20 +117,20 @@
       border-radius: inherit;
       pointer-events: none;
       background:
-        radial-gradient(60% 40% at 0% 0%, rgba(249, 115, 22, 0.18), transparent 60%),
-        radial-gradient(60% 40% at 100% 100%, rgba(74, 222, 128, 0.16), transparent 60%);
-      opacity: 0.7;
+        radial-gradient(60% 40% at 0% 0%, rgba(154, 52, 18, 0.28), transparent 60%),
+        radial-gradient(60% 40% at 100% 100%, rgba(34, 197, 94, 0.18), transparent 60%);
+      opacity: 0.75;
     }
     .panel--hero h1 {
       margin: 0 0 0.45rem;
       font-size: 1.75rem;
       font-weight: 700;
       letter-spacing: -0.02em;
-      background: linear-gradient(120deg, #fb923c 0%, #fde68a 45%, #4ade80 100%);
+      background: linear-gradient(120deg, var(--accent-3) 0%, #fdba74 45%, var(--green) 100%);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
-      text-shadow: 0 0 38px rgba(249, 115, 22, 0.18);
+      text-shadow: 0 0 38px rgba(154, 52, 18, 0.32);
     }
     .panel--auth {
       border-color: rgba(249, 115, 22, 0.36);
@@ -312,12 +313,12 @@
       font-weight: 700;
       letter-spacing: 0.01em;
       cursor: pointer;
-      color: #1a0a00;
-      background: linear-gradient(135deg, var(--accent) 0%, #fb923c 55%, #fdba74 100%);
+      color: #fff7ed;
+      background: linear-gradient(135deg, #7c2d12 0%, var(--accent) 50%, var(--accent-2) 100%);
       box-shadow:
-        0 8px 26px var(--accent-glow),
-        0 0 0 1px rgba(255, 255, 255, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.32);
+        0 10px 30px var(--accent-glow),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.22);
       margin-bottom: 0.35rem;
       overflow: hidden;
       transition: transform 0.15s, filter 0.15s, box-shadow 0.2s;
@@ -427,39 +428,59 @@
 
     .top-actions {
       position: absolute;
-      top: 0.7rem;
-      right: 0.7rem;
+      top: 0.9rem;
+      left: 0.9rem;
+      right: 0.9rem;
       display: flex;
-      gap: 0.4rem;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
       z-index: 2;
+      pointer-events: none;
     }
+    .top-actions > .icon-btn { pointer-events: auto; }
+    .top-actions > .icon-btn[hidden] { visibility: hidden; display: inline-flex !important; pointer-events: none; }
     .icon-btn {
-      width: 34px;
-      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      height: 36px;
+      padding: 0 0.7rem;
       border-radius: 10px;
-      display: grid;
-      place-items: center;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(0, 0, 0, 0.35);
-      color: var(--text);
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      border: 1px solid rgba(154, 52, 18, 0.55);
+      background: linear-gradient(135deg, rgba(154, 52, 18, 0.42), rgba(194, 65, 12, 0.32));
+      color: #fed7aa;
       cursor: pointer;
-      transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s;
+      transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s, box-shadow 0.2s;
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 4px 14px rgba(154, 52, 18, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
-    .icon-btn svg { width: 16px; height: 16px; }
+    .icon-btn svg { width: 14px; height: 14px; }
     .icon-btn:hover {
-      background: linear-gradient(135deg, rgba(249, 115, 22, 0.22), rgba(74, 222, 128, 0.16));
-      border-color: rgba(249, 115, 22, 0.55);
-      color: #fdba74;
-      box-shadow: 0 0 16px rgba(249, 115, 22, 0.22);
+      background: linear-gradient(135deg, rgba(154, 52, 18, 0.7), rgba(194, 65, 12, 0.55));
+      border-color: rgba(234, 88, 12, 0.85);
+      color: #fff7ed;
+      box-shadow: 0 6px 20px rgba(154, 52, 18, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    }
+    .icon-btn--logout {
+      border-color: rgba(242, 164, 164, 0.5);
+      background: linear-gradient(135deg, rgba(180, 60, 60, 0.4), rgba(120, 40, 40, 0.32));
+      color: #fecaca;
+      box-shadow: 0 4px 14px rgba(180, 60, 60, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
     .icon-btn--logout:hover {
-      background: rgba(242, 164, 164, 0.14);
-      border-color: rgba(242, 164, 164, 0.45);
-      color: var(--err);
+      background: linear-gradient(135deg, rgba(180, 60, 60, 0.65), rgba(120, 40, 40, 0.55));
+      border-color: rgba(252, 165, 165, 0.8);
+      color: #fff;
+      box-shadow: 0 6px 20px rgba(180, 60, 60, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.18);
     }
-    .icon-btn:active { transform: scale(0.94); }
+    .icon-btn:active { transform: scale(0.96); }
+    .icon-btn:disabled { opacity: 0.6; cursor: not-allowed; }
     .icon-btn[hidden] { display: none; }
     .icon-btn.spinning svg { animation: iconSpin 0.7s linear infinite; }
     @keyframes iconSpin {
@@ -474,17 +495,19 @@
     <header class="panel panel--hero">
       <div class="top-actions">
         <button type="button" class="icon-btn" id="refreshBtn" aria-label="Refresh" title="Refresh">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 12a9 9 0 1 1-3-6.7"></path>
             <polyline points="21 4 21 10 15 10"></polyline>
           </svg>
+          <span>Refresh</span>
         </button>
         <button type="button" class="icon-btn icon-btn--logout" id="topLogoutBtn" aria-label="Logout" title="Logout" hidden>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
             <polyline points="16 17 21 12 16 7"></polyline>
             <line x1="21" y1="12" x2="9" y2="12"></line>
           </svg>
+          <span>Logout</span>
         </button>
       </div>
       <h1 id="siteTitle">Notifications</h1>
