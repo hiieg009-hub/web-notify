@@ -435,7 +435,6 @@
       <h1 id="siteTitle">BETMAKINI APP</h1>
       <p class="sub" id="siteSub">Send notifications now</p>
       <div class="chips">
-        <div class="chip"><span>Topic</span> <strong id="topicDisplay">—</strong></div>
         <div class="chip" id="tzChip" style="display:none;"><span>Time</span> <strong id="tzDisplay"></strong></div>
         <div class="chip" id="cronChip" style="display:none;"><span class="status-dot" id="cronDot"></span> Cron</div>
         <div class="chip" id="devOpenChip" style="display:none;"><span>API</span> <strong>open (dev)</strong></div>
@@ -723,7 +722,6 @@
         meta = j;
         document.getElementById('siteTitle').textContent = j.siteName || 'BETMAKINI APP';
         document.title = j.siteName || 'BETMAKINI APP';
-        document.getElementById('topicDisplay').textContent = j.topic || '—';
         if (SHOW_SCHEDULE_UI && j.scheduleTz) {
           document.getElementById('tzChip').style.display = 'inline-flex';
           document.getElementById('tzDisplay').textContent = j.scheduleTz;
