@@ -80,6 +80,26 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (urlPath === '/api/login' && (req.method === 'GET' || req.method === 'POST')) {
+    if (adminSetupError()) {
+      writeJson(res, 503, {
+        error:
+          'No BETMAKINI IDs configured on the server. Add at least one inside lib/betmakiniIds.js then restart the server.',
+      });
+      return;
+    }
+    if (isAdminAuthOpen()) {
+      writeJson(res, 200, { ok: true, open: true });
+      return;
+    }
+    if (!adminAuthorized(req.headers)) {
+      writeJson(res, 401, { ok: false, error: 'Invalid BETMAKINI ID.' });
+      return;
+    }
+    writeJson(res, 200, { ok: true });
+    return;
+  }
+
   if (urlPath === '/api/schedule') {
     let bodyRaw = '';
     if (req.method === 'POST') {
@@ -133,15 +153,12 @@ const server = http.createServer(async (req, res) => {
     if (adminSetupError()) {
       writeJson(res, 503, {
         error:
-          'ADMIN_SECRET haipo. Weka kwenye .env.local. Dev bila nenosiri: ADMIN_AUTH_OPEN=1 (si salama hadharani).',
+          'No BETMAKINI IDs configured on the server. Add at least one inside lib/betmakiniIds.js then restart the server.',
       });
       return;
     }
     if (!adminAuthorized(req.headers)) {
-      writeJson(res, 401, {
-        error:
-          'Hitaji nenosiri la admin (x-admin-secret au Bearer sawa na ADMIN_SECRET).',
-      });
+      writeJson(res, 401, { error: 'Invalid BETMAKINI ID.' });
       return;
     }
 

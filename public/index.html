@@ -906,13 +906,21 @@
     }
 
     async function verifyAdminSecret(secret) {
-      const res = await fetch('/api/schedule', {
-        method: 'GET',
-        headers: {
-          'x-admin-secret': secret,
-        },
-      });
-      return res.ok;
+      try {
+        const res = await fetch('/api/login', {
+          method: 'GET',
+          headers: { 'x-admin-secret': secret },
+        });
+        if (res.ok) return { ok: true };
+        let msg = 'Invalid BETMAKINI ID.';
+        try {
+          const j = await res.json();
+          if (j && j.error) msg = j.error;
+        } catch (_) {}
+        return { ok: false, status: res.status, error: msg };
+      } catch (err) {
+        return { ok: false, networkError: err };
+      }
     }
 
     async function tryLogin() {
@@ -925,27 +933,33 @@
       loginOut.className = 'out';
       loginOut.textContent = 'Verifying...';
       loginBtn.disabled = true;
-      try {
-        const ok = await verifyAdminSecret(secret);
-        if (!ok) {
-          adminAuthenticated = false;
-          sessionStorage.removeItem(ADMIN_KEY);
-          loginOut.className = 'out err';
-          loginOut.textContent = 'Invalid BETMAKINI ID.';
-          applyLoginGate();
-          updateAuthGates();
-          return;
-        }
-        adminAuthenticated = true;
-        sessionStorage.setItem(ADMIN_KEY, secret);
-        loginOut.className = 'out ok';
-        loginOut.textContent = 'Signed in.';
+      const result = await verifyAdminSecret(secret);
+      if (result.networkError) {
+        loginOut.className = 'out err';
+        loginOut.textContent =
+          'Network: ' +
+          (result.networkError && result.networkError.message
+            ? result.networkError.message
+            : String(result.networkError));
+        loginBtn.disabled = false;
+        return;
+      }
+      if (!result.ok) {
+        adminAuthenticated = false;
+        sessionStorage.removeItem(ADMIN_KEY);
+        loginOut.className = 'out err';
+        loginOut.textContent = result.error || 'Invalid BETMAKINI ID.';
         applyLoginGate();
         updateAuthGates();
-      } catch (err) {
-        loginOut.className = 'out err';
-        loginOut.textContent = 'Network: ' + (err && err.message ? err.message : String(err));
+        loginBtn.disabled = false;
+        return;
       }
+      adminAuthenticated = true;
+      sessionStorage.setItem(ADMIN_KEY, secret);
+      loginOut.className = 'out ok';
+      loginOut.textContent = 'Signed in.';
+      applyLoginGate();
+      updateAuthGates();
       loginBtn.disabled = false;
     }
 
