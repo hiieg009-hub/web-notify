@@ -906,18 +906,35 @@
     }
 
     async function verifyAdminSecret(secret) {
-      try {
-        const res = await fetch('/api/login', {
+      // Jaribu /api/login kwanza (endpoint nyepesi). Kama haipo (404),
+      // anguka kwenye /api/schedule kwa fallback.
+      const tryEndpoint = async (path) => {
+        const res = await fetch(path, {
           method: 'GET',
           headers: { 'x-admin-secret': secret },
         });
+        let body = null;
+        try { body = await res.json(); } catch (_) {}
+        return { res, body };
+      };
+      try {
+        let attempt = await tryEndpoint('/api/login');
+        if (attempt.res.status === 404) {
+          attempt = await tryEndpoint('/api/schedule');
+        }
+        const { res, body } = attempt;
         if (res.ok) return { ok: true };
-        let msg = 'Invalid BETMAKINI ID.';
-        try {
-          const j = await res.json();
-          if (j && j.error) msg = j.error;
-        } catch (_) {}
-        return { ok: false, status: res.status, error: msg };
+        if (res.status === 401) {
+          return { ok: false, status: 401, error: 'Invalid BETMAKINI ID.' };
+        }
+        const serverMsg = body && body.error ? body.error : '';
+        return {
+          ok: false,
+          status: res.status,
+          error: serverMsg
+            ? serverMsg
+            : 'Server error (' + res.status + '). Please try again.',
+        };
       } catch (err) {
         return { ok: false, networkError: err };
       }
