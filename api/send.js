@@ -29,13 +29,16 @@ module.exports = async (req, res) => {
   if (adminSetupError()) {
     res.status(503).json({
       error:
-        'No BETMAKINI IDs configured on the server. Add at least one inside lib/betmakiniIds.js then redeploy.',
+        'ADMIN_SECRET haipo. Weka kwenye .env. Dev bila nenosiri: ADMIN_AUTH_OPEN=1 (si salama hadharani).',
     });
     return;
   }
 
   if (!adminAuthorized(req.headers)) {
-    res.status(401).json({ error: 'Invalid BETMAKINI ID.' });
+    res.status(401).json({
+      error:
+        'Hitaji nenosiri la admin (x-admin-secret au Bearer sawa na ADMIN_SECRET).',
+    });
     return;
   }
 

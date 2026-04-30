@@ -748,30 +748,29 @@
     <div id="serverMisconfig" class="panel panel--warn" style="display:none;">
       <h2>Server not configured</h2>
       <p class="hint" style="margin-top:0;color:var(--text);">
-        No BETMAKINI IDs configured. Add at least one ID inside
-        <code>lib/betmakiniIds.js</code> and redeploy.
+        No <code>ADMIN_SECRET</code> set in the server environment. Add it to <code>.env.local</code> then restart with <code>npm run dev</code>.
+        For local testing without a password (dev only): set <code>ADMIN_AUTH_OPEN=1</code> — <strong>do not use in production</strong>.
       </p>
     </div>
 
     <div id="adminWrap" class="panel panel--auth" hidden>
       <div class="auth-head">
         <div class="auth-text">
-          <h2>Sign in</h2>
-          <span class="auth-sub">Enter your BETMAKINI ID to continue</span>
+          <h2>Sign in first</h2>
+          <span class="auth-sub">Enter the admin password to continue</span>
         </div>
       </div>
-      <label for="adminKey">BETMAKINI ID</label>
+      <label for="adminKey">Admin password</label>
       <div class="pwd-field">
         <span class="pwd-leading" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="6" width="18" height="12" rx="2"></rect>
-            <circle cx="9" cy="12" r="2"></circle>
-            <path d="M14 11h4"></path>
-            <path d="M14 14h3"></path>
+            <path d="M21 2 13 10"></path>
+            <path d="m18 5 3 3"></path>
+            <circle cx="9" cy="15" r="5"></circle>
           </svg>
         </span>
-        <input id="adminKey" type="password" placeholder="e.g. BMK-XXXXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" />
-        <button type="button" class="pwd-toggle" id="pwdToggle" aria-label="Show ID" aria-pressed="false">
+        <input id="adminKey" type="password" placeholder="Enter password here" autocomplete="current-password" />
+        <button type="button" class="pwd-toggle" id="pwdToggle" aria-label="Show password" aria-pressed="false">
           <svg id="pwdEyeOn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
             <circle cx="12" cy="12" r="3"></circle>
@@ -791,7 +790,7 @@
     <section id="sendPanel" class="panel" hidden aria-hidden="true">
       <h2>Send now</h2>
       <p id="sendGateHint" class="hint" style="display:none;margin-top:0;">
-        Sign in with your BETMAKINI ID above before sending. The browser may remember it in this tab (sessionStorage).
+        Enter the admin password above before sending. The browser may remember it in this tab (sessionStorage).
       </p>
       <form id="f">
         <label for="title">Title</label>
@@ -906,77 +905,46 @@
     }
 
     async function verifyAdminSecret(secret) {
-      // Jaribu /api/login kwanza (endpoint nyepesi). Kama haipo (404),
-      // anguka kwenye /api/schedule kwa fallback.
-      const tryEndpoint = async (path) => {
-        const res = await fetch(path, {
-          method: 'GET',
-          headers: { 'x-admin-secret': secret },
-        });
-        let body = null;
-        try { body = await res.json(); } catch (_) {}
-        return { res, body };
-      };
-      try {
-        let attempt = await tryEndpoint('/api/login');
-        if (attempt.res.status === 404) {
-          attempt = await tryEndpoint('/api/schedule');
-        }
-        const { res, body } = attempt;
-        if (res.ok) return { ok: true };
-        if (res.status === 401) {
-          return { ok: false, status: 401, error: 'Invalid BETMAKINI ID.' };
-        }
-        const serverMsg = body && body.error ? body.error : '';
-        return {
-          ok: false,
-          status: res.status,
-          error: serverMsg
-            ? serverMsg
-            : 'Server error (' + res.status + '). Please try again.',
-        };
-      } catch (err) {
-        return { ok: false, networkError: err };
-      }
+      const res = await fetch('/api/schedule', {
+        method: 'GET',
+        headers: {
+          'x-admin-secret': secret,
+        },
+      });
+      return res.ok;
     }
 
     async function tryLogin() {
       const secret = (adminInput.value || '').trim();
       if (!secret) {
         loginOut.className = 'out err';
-        loginOut.textContent = 'Enter your BETMAKINI ID.';
+        loginOut.textContent = 'Enter the admin password.';
         return;
       }
       loginOut.className = 'out';
       loginOut.textContent = 'Verifying...';
       loginBtn.disabled = true;
-      const result = await verifyAdminSecret(secret);
-      if (result.networkError) {
-        loginOut.className = 'out err';
-        loginOut.textContent =
-          'Network: ' +
-          (result.networkError && result.networkError.message
-            ? result.networkError.message
-            : String(result.networkError));
-        loginBtn.disabled = false;
-        return;
-      }
-      if (!result.ok) {
-        adminAuthenticated = false;
-        sessionStorage.removeItem(ADMIN_KEY);
-        loginOut.className = 'out err';
-        loginOut.textContent = result.error || 'Invalid BETMAKINI ID.';
+      try {
+        const ok = await verifyAdminSecret(secret);
+        if (!ok) {
+          adminAuthenticated = false;
+          sessionStorage.removeItem(ADMIN_KEY);
+          loginOut.className = 'out err';
+          loginOut.textContent = 'Incorrect password.';
+          applyLoginGate();
+          updateAuthGates();
+          return;
+        }
+        adminAuthenticated = true;
+        sessionStorage.setItem(ADMIN_KEY, secret);
+        loginOut.className = 'out ok';
+        loginOut.textContent = 'Signed in.';
         applyLoginGate();
         updateAuthGates();
-        loginBtn.disabled = false;
-        return;
+      } catch (err) {
+        loginOut.className = 'out err';
+        loginOut.textContent = 'Network: ' + (err && err.message ? err.message : String(err));
       }
-      adminAuthenticated = true;
-      sessionStorage.setItem(ADMIN_KEY, secret);
-      loginOut.className = 'out ok';
-      loginOut.textContent = 'Signed in.';
-      applyLoginGate();
-      updateAuthGates();
       loginBtn.disabled = false;
     }
 
@@ -1162,7 +1130,7 @@
         const showing = adminInput.type === 'text';
         adminInput.type = showing ? 'password' : 'text';
         pwdToggleBtn.setAttribute('aria-pressed', String(!showing));
-        pwdToggleBtn.setAttribute('aria-label', showing ? 'Show ID' : 'Hide ID');
+        pwdToggleBtn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
         if (pwdEyeOn) pwdEyeOn.style.display = showing ? '' : 'none';
         if (pwdEyeOff) pwdEyeOff.style.display = showing ? 'none' : '';
       });
@@ -1221,8 +1189,8 @@
       if (!sendScheduleAllowed()) {
         out.className = 'out err';
         out.textContent = meta.adminSecretMissing
-          ? 'Server has no BETMAKINI IDs configured — add them to lib/betmakiniIds.js and redeploy.'
-          : 'Sign in with your BETMAKINI ID above first.';
+          ? 'Server has no ADMIN_SECRET — set it in .env.local and restart the server.'
+          : 'Enter the admin password above first.';
         return;
       }
       out.textContent = '';
@@ -1356,9 +1324,9 @@
         e.preventDefault();
         if (!sendScheduleAllowed()) {
           schedOut.className = 'out err';
-        schedOut.textContent = meta.adminSecretMissing
-          ? 'Server has no BETMAKINI IDs configured — add them to lib/betmakiniIds.js and redeploy.'
-          : 'Sign in with your BETMAKINI ID above first.';
+          schedOut.textContent = meta.adminSecretMissing
+            ? 'Server has no ADMIN_SECRET — set it in .env.local and restart the server.'
+            : 'Enter the admin password above first.';
           return;
         }
         schedOut.textContent = '';
