@@ -10,7 +10,7 @@
   <style>
     :root {
       --glass-bg: rgba(255, 255, 255, 0.05);
-      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-border: rgba(255, 255, 255, 0.05);
       --glass-highlight: rgba(255, 255, 255, 0.09);
       --text: #f3f7fb;
       --muted: rgba(232, 240, 248, 0.6);
@@ -33,9 +33,11 @@
     body {
       margin: 0;
       min-height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
       font-family: "Plus Jakarta Sans", system-ui, sans-serif;
       color: var(--text);
-      line-height: 1.45;
+      line-height: 1.4;
       background: #07100c;
     }
     .ambient {
@@ -67,9 +69,24 @@
       position: relative;
       z-index: 1;
       max-width: 520px;
+      height: 100dvh;
       margin: 0 auto;
-      padding: 1.75rem 1.25rem 3rem;
+      padding: 0.7rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      overflow: hidden;
     }
+    .layout > .panel { margin-bottom: 0; flex: 0 0 auto; }
+    .layout > .panel#sendPanel,
+    .layout > .panel#adminWrap {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .layout > .panel#sendPanel::-webkit-scrollbar,
+    .layout > .panel#adminWrap::-webkit-scrollbar { width: 0; height: 0; }
     .panel {
       position: relative;
       background:
@@ -79,16 +96,16 @@
       -webkit-backdrop-filter: blur(22px) saturate(160%);
       border: 1px solid var(--glass-border);
       border-radius: var(--radius);
-      padding: 1.45rem 1.4rem 1.55rem;
+      padding: 1rem 1.1rem 1.1rem;
       margin-bottom: 1.1rem;
       box-shadow:
         0 6px 28px rgba(0, 0, 0, 0.34),
         inset 0 1px 0 var(--glass-highlight);
     }
     .panel--hero {
-      padding: 1.85rem 1.4rem 1.55rem;
+      padding: 1.05rem 1.2rem 1.1rem;
       text-align: center;
-      border-color: rgba(154, 52, 18, 0.45);
+      border-color: rgba(154, 52, 18, 0.16);
       background:
         radial-gradient(120% 80% at 0% 0%, rgba(154, 52, 18, 0.32), transparent 55%),
         radial-gradient(120% 80% at 100% 0%, rgba(34, 197, 94, 0.18), transparent 55%),
@@ -121,9 +138,24 @@
         radial-gradient(60% 40% at 100% 100%, rgba(34, 197, 94, 0.18), transparent 60%);
       opacity: 0.75;
     }
+    .hero-logo {
+      display: block;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center;
+      margin: 0 auto 0.55rem;
+      background: rgba(0, 0, 0, 0.3);
+      box-shadow:
+        0 10px 28px rgba(154, 52, 18, 0.35),
+        0 0 0 1px rgba(255, 247, 237, 0.06),
+        0 0 24px rgba(74, 222, 128, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
     .panel--hero h1 {
       margin: 0;
-      font-size: 2.05rem;
+      font-size: 1.7rem;
       font-weight: 800;
       letter-spacing: 0.04em;
       background: linear-gradient(120deg, var(--accent-3) 0%, #fdba74 45%, var(--green) 100%);
@@ -133,8 +165,8 @@
       text-shadow: 0 0 38px rgba(154, 52, 18, 0.32);
     }
     .hero-tagline {
-      margin: 0.35rem 0 1rem;
-      font-size: 0.82rem;
+      margin: 0.2rem 0 0.6rem;
+      font-size: 0.72rem;
       font-weight: 500;
       letter-spacing: 0.18em;
       text-transform: uppercase;
@@ -158,7 +190,7 @@
     }
     .hero-tagline::after { left: 100%; }
     .panel--auth {
-      border-color: rgba(249, 115, 22, 0.36);
+      border-color: rgba(249, 115, 22, 0.14);
       background:
         linear-gradient(180deg, rgba(249, 115, 22, 0.09), transparent 55%),
         radial-gradient(80% 60% at 100% 0%, rgba(74, 222, 128, 0.1), transparent 55%),
@@ -179,30 +211,16 @@
     }
     .auth-head {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 0.85rem;
-      margin-bottom: 1.1rem;
+      gap: 0.55rem;
+      margin-bottom: 1rem;
+      text-align: center;
     }
-    .auth-icon {
-      flex: 0 0 auto;
-      width: 46px;
-      height: 46px;
-      border-radius: 13px;
-      display: grid;
-      place-items: center;
-      color: #fdba74;
-      background: linear-gradient(135deg, rgba(249, 115, 22, 0.32), rgba(74, 222, 128, 0.24));
-      border: 1px solid rgba(249, 115, 22, 0.5);
-      box-shadow:
-        0 0 24px rgba(249, 115, 22, 0.32),
-        0 0 0 1px rgba(74, 222, 128, 0.18),
-        inset 0 1px 0 rgba(255, 255, 255, 0.12);
-    }
-    .auth-icon svg { width: 22px; height: 22px; }
-    .auth-head .auth-text { display: flex; flex-direction: column; gap: 2px; }
+    .auth-head .auth-text { display: flex; flex-direction: column; gap: 2px; align-items: center; }
     .auth-head h2 {
       margin: 0;
-      font-size: 0.95rem;
+      font-size: 0.98rem;
       font-weight: 700;
       letter-spacing: 0;
       text-transform: none;
@@ -270,13 +288,13 @@
       font-size: 0.78rem;
       font-weight: 600;
       background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.25));
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.04);
       color: var(--text);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
     .chip span { color: var(--muted); font-weight: 500; }
     .chip strong { color: var(--accent-2); font-weight: 700; }
-    .chip:nth-child(1) { border-color: rgba(249, 115, 22, 0.35); background: linear-gradient(180deg, rgba(249, 115, 22, 0.18), rgba(234, 88, 12, 0.08)); }
+    .chip:nth-child(1) { border-color: rgba(249, 115, 22, 0.16); background: linear-gradient(180deg, rgba(249, 115, 22, 0.18), rgba(234, 88, 12, 0.08)); }
     .chip:nth-child(1) strong { color: #fdba74; }
     .status-dot {
       width: 7px;
@@ -292,8 +310,8 @@
       50%      { box-shadow: 0 0 14px var(--green-glow); }
     }
     h2 {
-      margin: 0 0 1rem;
-      font-size: 0.72rem;
+      margin: 0 0 0.65rem;
+      font-size: 0.7rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.12em;
@@ -301,21 +319,21 @@
     }
     label {
       display: block;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 600;
       color: var(--muted);
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.25rem;
     }
     input, textarea, select {
       width: 100%;
-      padding: 0.82rem 0.95rem;
+      padding: 0.65rem 0.85rem;
       border-radius: var(--radius-sm);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.04);
       background: rgba(0, 0, 0, 0.34);
       color: var(--text);
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       font-family: inherit;
-      margin-bottom: 1rem;
+      margin-bottom: 0.65rem;
       transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
     }
     input::placeholder, textarea::placeholder { color: rgba(230, 237, 247, 0.4); }
@@ -326,11 +344,11 @@
       box-shadow: 0 0 0 3px var(--accent-glow), 0 0 0 4px rgba(74, 222, 128, 0.12);
       background: rgba(0, 0, 0, 0.42);
     }
-    textarea { min-height: 88px; resize: vertical; }
+    textarea { min-height: 60px; resize: none; }
     button.primary {
       position: relative;
       width: 100%;
-      padding: 0.92rem 1rem;
+      padding: 0.75rem 1rem;
       border: none;
       border-radius: var(--radius-sm);
       font-family: inherit;
@@ -375,7 +393,7 @@
       font-size: 0.82rem;
       font-weight: 600;
       cursor: pointer;
-      border: 1px solid rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.06);
       background: rgba(255, 255, 255, 0.05);
       color: var(--text);
       margin: 0;
@@ -397,7 +415,7 @@
       padding: 0.7rem 1rem;
       font-size: 0.88rem;
       color: var(--err);
-      border-color: rgba(242, 164, 164, 0.32);
+      border-color: rgba(242, 164, 164, 0.16);
       background: rgba(180, 60, 60, 0.08);
     }
     button.ghost--logout svg { width: 16px; height: 16px; }
@@ -413,7 +431,7 @@
       white-space: pre-wrap;
       word-break: break-word;
       background: rgba(0, 0, 0, 0.25);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.04);
       transition: border-color 0.2s, background 0.2s;
     }
     .out:empty {
@@ -435,7 +453,7 @@
       background:
         radial-gradient(120% 80% at 0% 0%, rgba(34, 197, 94, 0.22), transparent 60%),
         linear-gradient(180deg, rgba(34, 197, 94, 0.14), rgba(34, 197, 94, 0.04));
-      border: 1px solid rgba(74, 222, 128, 0.42);
+      border: 1px solid rgba(74, 222, 128, 0.2);
       box-shadow:
         0 10px 30px rgba(34, 197, 94, 0.22),
         inset 0 1px 0 rgba(255, 255, 255, 0.08);
@@ -498,7 +516,7 @@
       border-radius: var(--radius-sm);
       margin-bottom: 0.65rem;
       background: rgba(0, 0, 0, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.04);
       font-size: 0.84rem;
     }
     .sched-item strong { color: var(--text); }
@@ -512,7 +530,7 @@
       background: rgba(0, 0, 0, 0.15);
     }
     .panel--warn {
-      border-color: rgba(242, 164, 164, 0.45);
+      border-color: rgba(242, 164, 164, 0.22);
       background: rgba(120, 40, 40, 0.15);
     }
     .panel--warn h2 { color: var(--err); }
@@ -716,6 +734,7 @@
   <div class="ambient" aria-hidden="true"></div>
   <div class="layout">
     <header class="panel panel--hero">
+      <img src="/betmakini-logo.jpg" alt="BetMakini" class="hero-logo" />
       <h1 id="siteTitle">BETMAKINI</h1>
       <p class="hero-tagline">Notification system</p>
       <div class="chips">
@@ -736,13 +755,6 @@
 
     <div id="adminWrap" class="panel panel--auth" hidden>
       <div class="auth-head">
-        <div class="auth-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="4" y="11" width="16" height="10" rx="2"></rect>
-            <path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
-            <circle cx="12" cy="16" r="1.2" fill="currentColor"></circle>
-          </svg>
-        </div>
         <div class="auth-text">
           <h2>Sign in first</h2>
           <span class="auth-sub">Enter the admin password to continue</span>
@@ -801,7 +813,7 @@
           <p class="success-card__sub" id="successCardSub">Your message has been delivered.</p>
         </div>
       </div>
-      <button type="button" class="ghost ghost--logout" id="bottomLogoutBtn" style="margin-top:1rem;">
+      <button type="button" class="ghost ghost--logout" id="bottomLogoutBtn" style="margin-top:0.6rem;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
           <polyline points="16 17 21 12 16 7"></polyline>
