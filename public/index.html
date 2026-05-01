@@ -1626,26 +1626,6 @@
       }
       openConfirm();
     });
-        const text = await res.text();
-        let parsed = null;
-        try { parsed = JSON.parse(text); } catch (_) {}
-        if (res.ok) {
-          // Technical details run silently in the background (logged for debugging only)
-          if (parsed) console.debug('[notify] send ok:', parsed);
-          showSuccessCard(title, body);
-          out.textContent = '';
-          out.className = 'out';
-        } else {
-          const errMsg = (parsed && (parsed.error || parsed.message)) || text || 'Unknown error';
-          out.className = 'out err';
-          out.textContent = 'Error (' + res.status + '): ' + errMsg;
-        }
-      } catch (err) {
-        out.className = 'out err';
-        out.textContent = 'Network: ' + (err && err.message ? err.message : String(err));
-      }
-      btn.disabled = false;
-    });
 
     async function loadSchedules() {
       if (!SHOW_SCHEDULE_UI || !scheduleModePersistent()) return;
