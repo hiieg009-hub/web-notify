@@ -1920,6 +1920,8 @@
         if (res.ok) {
           if (parsed) console.debug('[notify] send ok:', parsed);
           showSuccessCard(payload.title, payload.body);
+          // Refresh the page shortly after success so the form resets cleanly
+          setTimeout(() => { window.location.reload(); }, 1800);
         } else {
           const errMsg = (parsed && (parsed.error || parsed.message)) || text || 'Unknown error';
           out.className = 'out err';
