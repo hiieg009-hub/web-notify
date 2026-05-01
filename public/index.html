@@ -356,6 +356,60 @@
       background: rgba(0, 0, 0, 0.42);
     }
     textarea { min-height: 60px; resize: none; }
+    .preset-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 0.55rem;
+    }
+    .preset-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(0, 0, 0, 0.22));
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.82rem;
+      line-height: 1.35;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s, transform 0.12s, box-shadow 0.18s;
+    }
+    .preset-item:hover {
+      border-color: rgba(249, 115, 22, 0.32);
+      background: linear-gradient(180deg, rgba(249, 115, 22, 0.08), rgba(0, 0, 0, 0.22));
+    }
+    .preset-item:active { transform: scale(0.99); }
+    .preset-item.is-active {
+      border-color: rgba(74, 222, 128, 0.42);
+      background:
+        linear-gradient(180deg, rgba(34, 197, 94, 0.12), rgba(34, 197, 94, 0.04));
+      box-shadow: 0 0 0 1px rgba(74, 222, 128, 0.14), 0 6px 18px rgba(34, 197, 94, 0.18);
+    }
+    .preset-item__num {
+      flex: 0 0 auto;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #fdba74;
+      background: rgba(249, 115, 22, 0.16);
+      border: 1px solid rgba(249, 115, 22, 0.28);
+      margin-top: 1px;
+    }
+    .preset-item.is-active .preset-item__num {
+      color: #06140a;
+      background: linear-gradient(135deg, var(--green-2), var(--green));
+      border-color: rgba(74, 222, 128, 0.5);
+    }
+    .preset-item__text { flex: 1 1 auto; min-width: 0; }
     button.primary {
       position: relative;
       width: 100%;
@@ -853,7 +907,17 @@
         <label for="title">Title</label>
         <input id="title" type="text" value="BET MAKINI" readonly autocomplete="off" />
         <label for="body">Message</label>
-        <textarea id="body" placeholder="Optional"></textarea>
+        <div class="preset-list" role="listbox" aria-label="Choose a preset message">
+          <button type="button" class="preset-item" data-preset="New betslip updated from tipster Profit nation with 2.10 odds, price of 1,000/=." role="option">
+            <span class="preset-item__num">1</span>
+            <span class="preset-item__text">New betslip updated from tipster Profit nation with 2.10 odds, price of 1,000/=.</span>
+          </button>
+          <button type="button" class="preset-item" data-preset='New betslip updated from tipster Thd mkamaria with 2.10 odds, price of 1,000/=.' role="option">
+            <span class="preset-item__num">2</span>
+            <span class="preset-item__text">New betslip updated from tipster Thd mkamaria with 2.10 odds, price of 1,000/=.</span>
+          </button>
+        </div>
+        <textarea id="body" placeholder="Tap a preset above or type your own message"></textarea>
         <label for="image">Image URL</label>
         <input id="image" type="url" placeholder="https://..." autocomplete="off" />
         <button type="submit" class="primary" id="btn">Send now</button>
@@ -1264,6 +1328,31 @@
       if (successHideTimer) clearTimeout(successHideTimer);
       successHideTimer = setTimeout(() => { successCard.hidden = true; }, 6000);
     }
+
+    // Preset message buttons
+    (function () {
+      const bodyInput = document.getElementById('body');
+      const presetItems = document.querySelectorAll('.preset-item');
+      presetItems.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const text = btn.getAttribute('data-preset') || '';
+          if (!bodyInput) return;
+          bodyInput.value = text;
+          presetItems.forEach((b) => b.classList.remove('is-active'));
+          btn.classList.add('is-active');
+          try { bodyInput.focus({ preventScroll: true }); } catch (_) { bodyInput.focus(); }
+          try { bodyInput.setSelectionRange(text.length, text.length); } catch (_) {}
+        });
+      });
+      if (bodyInput) {
+        bodyInput.addEventListener('input', () => {
+          const current = bodyInput.value;
+          presetItems.forEach((b) => {
+            if (b.getAttribute('data-preset') !== current) b.classList.remove('is-active');
+          });
+        });
+      }
+    })();
 
     document.getElementById('f').addEventListener('submit', async (e) => {
       e.preventDefault();
