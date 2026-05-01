@@ -356,11 +356,81 @@
       background: rgba(0, 0, 0, 0.42);
     }
     textarea { min-height: 60px; resize: none; }
+    .preset-dd {
+      position: relative;
+      margin-bottom: 0.55rem;
+    }
+    .preset-trigger {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      background: rgba(0, 0, 0, 0.34);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+    }
+    .preset-trigger:hover {
+      border-color: rgba(249, 115, 22, 0.32);
+    }
+    .preset-trigger[aria-expanded="true"] {
+      border-color: rgba(249, 115, 22, 0.55);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+      background: rgba(0, 0, 0, 0.42);
+    }
+    .preset-trigger__label {
+      flex: 1 1 auto;
+      min-width: 0;
+      text-align: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: rgba(230, 237, 247, 0.55);
+    }
+    .preset-trigger.has-value .preset-trigger__label {
+      color: var(--text);
+    }
+    .preset-trigger__caret {
+      flex: 0 0 auto;
+      width: 16px;
+      height: 16px;
+      color: #fdba74;
+      transition: transform 0.2s ease;
+    }
+    .preset-trigger[aria-expanded="true"] .preset-trigger__caret {
+      transform: rotate(180deg);
+    }
     .preset-list {
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
-      margin-bottom: 0.55rem;
+      gap: 0.35rem;
+      position: absolute;
+      top: calc(100% + 0.35rem);
+      left: 0;
+      right: 0;
+      z-index: 5;
+      padding: 0.4rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background:
+        linear-gradient(180deg, rgba(20, 28, 24, 0.96), rgba(15, 22, 19, 0.96));
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
+      box-shadow: 0 18px 38px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(74, 222, 128, 0.06);
+      max-height: 240px;
+      overflow-y: auto;
+      animation: presetOpen 0.18s ease-out;
+    }
+    .preset-list[hidden] { display: none; }
+    @keyframes presetOpen {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
     .preset-item {
       display: flex;
@@ -907,29 +977,37 @@
         <label for="title">Title</label>
         <input id="title" type="text" value="BET MAKINI" readonly autocomplete="off" />
         <label for="body">Message</label>
-        <div class="preset-list" role="listbox" aria-label="Choose a preset message">
-          <button type="button" class="preset-item" data-preset="New betslip updated from tipster Profit nation with 2.10 odds, price of 1,000/=." role="option">
-            <span class="preset-item__num">1</span>
-            <span class="preset-item__text">New betslip updated from tipster Profit nation with 2.10 odds, price of 1,000/=.</span>
+        <div class="preset-dd" id="presetDd">
+          <button type="button" class="preset-trigger" id="presetTrigger" aria-haspopup="listbox" aria-expanded="false">
+            <span class="preset-trigger__label" id="presetTriggerLabel">Choose preset message</span>
+            <svg class="preset-trigger__caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
           </button>
-          <button type="button" class="preset-item" data-preset='New betslip updated from tipster Thd mkamaria with 2.10 odds, price of 1,000/=.' role="option">
-            <span class="preset-item__num">2</span>
-            <span class="preset-item__text">New betslip updated from tipster Thd mkamaria with 2.10 odds, price of 1,000/=.</span>
-          </button>
-          <button type="button" class="preset-item" data-preset="New betslip updated from tipster De boss with 2.10 odds, price of 1,000/=." role="option">
-            <span class="preset-item__num">3</span>
-            <span class="preset-item__text">New betslip updated from tipster De boss with 2.10 odds, price of 1,000/=.</span>
-          </button>
-          <button type="button" class="preset-item" data-preset="New betslip updated from tipster Rhino with 2.10 odds, price of 1,000/=." role="option">
-            <span class="preset-item__num">4</span>
-            <span class="preset-item__text">New betslip updated from tipster Rhino with 2.10 odds, price of 1,000/=.</span>
-          </button>
-          <button type="button" class="preset-item" data-preset="New betslip updated from tipster Kiboko ya kanji with 2.10 odds, price of 1,000/=." role="option">
-            <span class="preset-item__num">5</span>
-            <span class="preset-item__text">New betslip updated from tipster Kiboko ya kanji with 2.10 odds, price of 1,000/=.</span>
-          </button>
+          <div class="preset-list" role="listbox" aria-label="Choose a preset message" hidden>
+            <button type="button" class="preset-item" data-preset="New betslip updated from tipster Profit nation with 2.10 odds, price of 1,000/=." role="option">
+              <span class="preset-item__num">1</span>
+              <span class="preset-item__text">New betslip updated from tipster Profit nation with 2.10 odds, price of 1,000/=.</span>
+            </button>
+            <button type="button" class="preset-item" data-preset='New betslip updated from tipster Thd mkamaria with 2.10 odds, price of 1,000/=.' role="option">
+              <span class="preset-item__num">2</span>
+              <span class="preset-item__text">New betslip updated from tipster Thd mkamaria with 2.10 odds, price of 1,000/=.</span>
+            </button>
+            <button type="button" class="preset-item" data-preset="New betslip updated from tipster De boss with 2.10 odds, price of 1,000/=." role="option">
+              <span class="preset-item__num">3</span>
+              <span class="preset-item__text">New betslip updated from tipster De boss with 2.10 odds, price of 1,000/=.</span>
+            </button>
+            <button type="button" class="preset-item" data-preset="New betslip updated from tipster Rhino with 2.10 odds, price of 1,000/=." role="option">
+              <span class="preset-item__num">4</span>
+              <span class="preset-item__text">New betslip updated from tipster Rhino with 2.10 odds, price of 1,000/=.</span>
+            </button>
+            <button type="button" class="preset-item" data-preset="New betslip updated from tipster Kiboko ya kanji with 2.10 odds, price of 1,000/=." role="option">
+              <span class="preset-item__num">5</span>
+              <span class="preset-item__text">New betslip updated from tipster Kiboko ya kanji with 2.10 odds, price of 1,000/=.</span>
+            </button>
+          </div>
         </div>
-        <textarea id="body" placeholder="Tap a preset above or type your own message"></textarea>
+        <textarea id="body" placeholder="Tap the dropdown above or type your own message"></textarea>
         <label for="image">Image URL</label>
         <input id="image" type="url" placeholder="https://..." autocomplete="off" />
         <button type="submit" class="primary" id="btn">Send now</button>
@@ -1341,29 +1419,69 @@
       successHideTimer = setTimeout(() => { successCard.hidden = true; }, 6000);
     }
 
-    // Preset message buttons
+    // Preset message dropdown
     (function () {
       const bodyInput = document.getElementById('body');
+      const trigger = document.getElementById('presetTrigger');
+      const triggerLabel = document.getElementById('presetTriggerLabel');
+      const list = document.querySelector('#presetDd .preset-list');
       const presetItems = document.querySelectorAll('.preset-item');
+      if (!bodyInput || !trigger || !list) return;
+
+      const DEFAULT_LABEL = 'Choose preset message';
+
+      function openList() {
+        list.hidden = false;
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+      function closeList() {
+        list.hidden = true;
+        trigger.setAttribute('aria-expanded', 'false');
+      }
+      function toggleList() {
+        if (list.hidden) openList(); else closeList();
+      }
+
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleList();
+      });
+
       presetItems.forEach((btn) => {
         btn.addEventListener('click', () => {
           const text = btn.getAttribute('data-preset') || '';
-          if (!bodyInput) return;
+          const num = btn.querySelector('.preset-item__num');
           bodyInput.value = text;
           presetItems.forEach((b) => b.classList.remove('is-active'));
           btn.classList.add('is-active');
+          triggerLabel.textContent = num ? ('Preset ' + num.textContent + ' selected') : 'Preset selected';
+          trigger.classList.add('has-value');
+          closeList();
           try { bodyInput.focus({ preventScroll: true }); } catch (_) { bodyInput.focus(); }
           try { bodyInput.setSelectionRange(text.length, text.length); } catch (_) {}
         });
       });
-      if (bodyInput) {
-        bodyInput.addEventListener('input', () => {
-          const current = bodyInput.value;
-          presetItems.forEach((b) => {
-            if (b.getAttribute('data-preset') !== current) b.classList.remove('is-active');
-          });
+
+      bodyInput.addEventListener('input', () => {
+        const current = bodyInput.value;
+        let stillMatches = false;
+        presetItems.forEach((b) => {
+          if (b.getAttribute('data-preset') === current) stillMatches = true;
+          else b.classList.remove('is-active');
         });
-      }
+        if (!stillMatches) {
+          triggerLabel.textContent = DEFAULT_LABEL;
+          trigger.classList.remove('has-value');
+        }
+      });
+
+      document.addEventListener('click', (e) => {
+        if (list.hidden) return;
+        if (!document.getElementById('presetDd').contains(e.target)) closeList();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !list.hidden) closeList();
+      });
     })();
 
     document.getElementById('f').addEventListener('submit', async (e) => {
