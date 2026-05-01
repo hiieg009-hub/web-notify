@@ -871,6 +871,74 @@
       gap: 0.55rem;
     }
     .confirm-actions > button { flex: 1 1 0; padding: 0.7rem 0.85rem; }
+
+    /* Custom delay modal */
+    .custom-delay-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.55rem;
+      margin: 0 0 0.85rem;
+    }
+    .custom-delay-field { text-align: left; }
+    .custom-delay-field label {
+      display: block;
+      margin: 0 0 0.3rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .custom-delay-field input {
+      margin-bottom: 0;
+      padding: 0.7rem 0.85rem;
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      font-variant-numeric: tabular-nums;
+      color: #fdba74;
+    }
+    .custom-delay-presets {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.35rem;
+      margin: 0 0 0.95rem;
+    }
+    .custom-delay-presets button {
+      padding: 0.4rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(0, 0, 0, 0.32);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.74rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s, color 0.18s;
+    }
+    .custom-delay-presets button:hover {
+      border-color: rgba(249, 115, 22, 0.32);
+      color: #fdba74;
+    }
+    .custom-delay-summary {
+      margin: 0 0 0.85rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: var(--radius-sm);
+      background: rgba(0, 0, 0, 0.32);
+      border: 1px solid rgba(74, 222, 128, 0.18);
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .custom-delay-summary strong {
+      color: var(--green);
+      font-weight: 700;
+    }
+    .custom-delay-summary.has-error {
+      border-color: rgba(242, 164, 164, 0.3);
+      color: var(--err);
+    }
     @keyframes confirmFadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes confirmPop {
       from { opacity: 0; transform: translateY(8px) scale(0.96); }
@@ -1308,6 +1376,46 @@
         <div id="schedList"></div>
       </div>
     </section>
+  </div>
+
+  <div class="confirm-overlay" id="customDelayOverlay" role="dialog" aria-modal="true" aria-labelledby="customDelayTitle" hidden>
+    <div class="confirm-modal">
+      <div class="confirm-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="13" r="8"></circle>
+          <path d="M12 9v4l2.5 2"></path>
+          <path d="M9 2h6"></path>
+        </svg>
+      </div>
+      <h3 class="confirm-title" id="customDelayTitle">Set custom delay</h3>
+      <p class="confirm-sub">Choose how long to wait before sending.</p>
+      <div class="custom-delay-grid">
+        <div class="custom-delay-field">
+          <label for="customDelayHours">Hours</label>
+          <input id="customDelayHours" type="number" min="0" max="23" step="1" value="0" inputmode="numeric" />
+        </div>
+        <div class="custom-delay-field">
+          <label for="customDelayMinutes">Minutes</label>
+          <input id="customDelayMinutes" type="number" min="0" max="59" step="1" value="10" inputmode="numeric" />
+        </div>
+      </div>
+      <div class="custom-delay-presets" aria-label="Quick presets">
+        <button type="button" data-cd-mins="2">2 min</button>
+        <button type="button" data-cd-mins="10">10 min</button>
+        <button type="button" data-cd-mins="20">20 min</button>
+        <button type="button" data-cd-mins="45">45 min</button>
+        <button type="button" data-cd-mins="120">2 hr</button>
+      </div>
+      <p class="custom-delay-summary" id="customDelaySummary">Will send in <strong>10 min</strong>.</p>
+      <div class="confirm-actions">
+        <button type="button" class="ghost" id="customDelayCancel">Cancel</button>
+        <button type="button" class="primary" id="customDelayApply">
+          <span class="btn-content">
+            <span class="btn-label">Apply</span>
+          </span>
+        </button>
+      </div>
+    </div>
   </div>
 
   <div class="confirm-overlay" id="confirmOverlay" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmSub" hidden>
@@ -1778,20 +1886,89 @@
       if (sendBtnLabel) sendBtnLabel.textContent = selectedDelaySeconds > 0 ? 'Schedule send' : 'Send now';
     }
 
+    // Custom delay modal
+    const customDelayOverlay = document.getElementById('customDelayOverlay');
+    const customDelayHours = document.getElementById('customDelayHours');
+    const customDelayMinutes = document.getElementById('customDelayMinutes');
+    const customDelaySummary = document.getElementById('customDelaySummary');
+    const customDelayApply = document.getElementById('customDelayApply');
+    const customDelayCancel = document.getElementById('customDelayCancel');
+
+    function getCustomDelaySeconds() {
+      const h = Math.max(0, Math.min(23, parseInt(customDelayHours.value, 10) || 0));
+      const m = Math.max(0, Math.min(59, parseInt(customDelayMinutes.value, 10) || 0));
+      return h * 3600 + m * 60;
+    }
+    function refreshCustomDelaySummary() {
+      const secs = getCustomDelaySeconds();
+      if (secs <= 0) {
+        customDelaySummary.classList.add('has-error');
+        customDelaySummary.innerHTML = 'Choose at least 1 minute.';
+        customDelayApply.disabled = true;
+        customDelayApply.style.opacity = '0.5';
+        customDelayApply.style.cursor = 'not-allowed';
+      } else {
+        customDelaySummary.classList.remove('has-error');
+        customDelaySummary.innerHTML = 'Will send in <strong>' + formatDelayLabel(secs) + '</strong>.';
+        customDelayApply.disabled = false;
+        customDelayApply.style.opacity = '';
+        customDelayApply.style.cursor = '';
+      }
+    }
+    function openCustomDelay() {
+      if (!customDelayOverlay) return;
+      // Pre-fill from current selection if it was already custom
+      if (selectedDelaySeconds > 0) {
+        customDelayHours.value = String(Math.floor(selectedDelaySeconds / 3600));
+        customDelayMinutes.value = String(Math.floor((selectedDelaySeconds % 3600) / 60));
+      }
+      refreshCustomDelaySummary();
+      customDelayOverlay.hidden = false;
+      try { customDelayMinutes.focus(); customDelayMinutes.select(); } catch (_) {}
+    }
+    function closeCustomDelay() {
+      if (!customDelayOverlay) return;
+      customDelayOverlay.hidden = true;
+    }
+    if (customDelayHours) customDelayHours.addEventListener('input', refreshCustomDelaySummary);
+    if (customDelayMinutes) customDelayMinutes.addEventListener('input', refreshCustomDelaySummary);
+    document.querySelectorAll('.custom-delay-presets button').forEach((b) => {
+      b.addEventListener('click', () => {
+        const totalMins = parseInt(b.getAttribute('data-cd-mins'), 10) || 0;
+        customDelayHours.value = String(Math.floor(totalMins / 60));
+        customDelayMinutes.value = String(totalMins % 60);
+        refreshCustomDelaySummary();
+      });
+    });
+    if (customDelayCancel) customDelayCancel.addEventListener('click', closeCustomDelay);
+    if (customDelayApply) customDelayApply.addEventListener('click', () => {
+      const secs = getCustomDelaySeconds();
+      if (secs <= 0) return;
+      updateDelaySelection(secs, true);
+      closeCustomDelay();
+    });
+    if (customDelayOverlay) {
+      customDelayOverlay.addEventListener('click', (e) => {
+        if (e.target === customDelayOverlay) closeCustomDelay();
+      });
+    }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && customDelayOverlay && !customDelayOverlay.hidden) closeCustomDelay();
+      if (e.key === 'Enter' && customDelayOverlay && !customDelayOverlay.hidden) {
+        const secs = getCustomDelaySeconds();
+        if (secs > 0) {
+          updateDelaySelection(secs, true);
+          closeCustomDelay();
+        }
+      }
+    });
+
     if (delayChipsEl) {
       delayChipsEl.querySelectorAll('.delay-chip').forEach((chip) => {
         chip.addEventListener('click', () => {
           const v = chip.getAttribute('data-delay');
           if (v === 'custom') {
-            const raw = window.prompt('Send after how many minutes?', '10');
-            if (raw === null) return;
-            const mins = parseFloat(raw);
-            if (!isFinite(mins) || mins <= 0) {
-              out.className = 'out err';
-              out.textContent = 'Enter a positive number of minutes.';
-              return;
-            }
-            updateDelaySelection(Math.round(mins * 60), true);
+            openCustomDelay();
           } else {
             updateDelaySelection(parseInt(v, 10), false);
           }
