@@ -385,6 +385,46 @@
       background: linear-gradient(135deg, var(--green-2) 0%, var(--green) 100%);
       box-shadow: 0 8px 26px var(--green-glow), 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.28);
     }
+    button.primary .btn-content {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    button.primary .btn-spinner {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 247, 237, 0.32);
+      border-top-color: #fff7ed;
+      animation: btnSpin 0.7s linear infinite;
+      display: none;
+    }
+    button.primary .btn-check {
+      width: 16px;
+      height: 16px;
+      display: none;
+      stroke: currentColor;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+    button.primary .btn-check path {
+      stroke-dasharray: 24;
+      stroke-dashoffset: 24;
+    }
+    button.primary.is-loading {
+      cursor: progress;
+      opacity: 0.92;
+    }
+    button.primary.is-loading::after { display: none; }
+    button.primary.is-loading .btn-spinner { display: inline-block; }
+    button.primary.is-success { background: linear-gradient(135deg, var(--green-2) 0%, var(--green) 100%); color: #06140a; box-shadow: 0 8px 26px var(--green-glow), 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.28); }
+    button.primary.is-success .btn-check { display: inline-block; }
+    button.primary.is-success .btn-check path { animation: btnDrawCheck 0.4s ease-out forwards; }
+    @keyframes btnSpin { to { transform: rotate(360deg); } }
+    @keyframes btnDrawCheck { to { stroke-dashoffset: 0; } }
     button.ghost, button.danger-ghost {
       flex: 1;
       padding: 0.55rem 0.7rem;
@@ -783,7 +823,13 @@
           </svg>
         </button>
       </div>
-      <button type="button" class="primary" id="loginBtn">Sign in</button>
+      <button type="button" class="primary" id="loginBtn">
+        <span class="btn-content">
+          <span class="btn-spinner" aria-hidden="true"></span>
+          <svg class="btn-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+          <span class="btn-label" id="loginBtnLabel">Sign in</span>
+        </span>
+      </button>
       <div id="loginOut" class="out"></div>
     </div>
 
@@ -914,21 +960,41 @@
       return res.ok;
     }
 
+    const loginBtnLabel = document.getElementById('loginBtnLabel');
+    function setLoginBtnState(state) {
+      // state: 'idle' | 'loading' | 'success'
+      loginBtn.classList.remove('is-loading', 'is-success');
+      if (state === 'loading') {
+        loginBtn.classList.add('is-loading');
+        loginBtn.disabled = true;
+        if (loginBtnLabel) loginBtnLabel.textContent = 'Verifying...';
+      } else if (state === 'success') {
+        loginBtn.classList.add('is-success');
+        loginBtn.disabled = true;
+        if (loginBtnLabel) loginBtnLabel.textContent = 'Signed in';
+      } else {
+        loginBtn.disabled = false;
+        if (loginBtnLabel) loginBtnLabel.textContent = 'Sign in';
+      }
+    }
+
     async function tryLogin() {
       const secret = (adminInput.value || '').trim();
       if (!secret) {
         loginOut.className = 'out err';
         loginOut.textContent = 'Enter the admin password.';
+        try { adminInput.focus(); } catch (_) {}
         return;
       }
       loginOut.className = 'out';
-      loginOut.textContent = 'Verifying...';
-      loginBtn.disabled = true;
+      loginOut.textContent = '';
+      setLoginBtnState('loading');
       try {
         const ok = await verifyAdminSecret(secret);
         if (!ok) {
           adminAuthenticated = false;
           sessionStorage.removeItem(ADMIN_KEY);
+          setLoginBtnState('idle');
           loginOut.className = 'out err';
           loginOut.textContent = 'Incorrect password.';
           applyLoginGate();
@@ -937,15 +1003,20 @@
         }
         adminAuthenticated = true;
         sessionStorage.setItem(ADMIN_KEY, secret);
-        loginOut.className = 'out ok';
-        loginOut.textContent = 'Signed in.';
-        applyLoginGate();
-        updateAuthGates();
+        setLoginBtnState('success');
+        loginOut.className = 'out';
+        loginOut.textContent = '';
+        // Brief pause so the user sees the success state before the panel swap
+        setTimeout(() => {
+          applyLoginGate();
+          updateAuthGates();
+          setLoginBtnState('idle');
+        }, 550);
       } catch (err) {
+        setLoginBtnState('idle');
         loginOut.className = 'out err';
         loginOut.textContent = 'Network: ' + (err && err.message ? err.message : String(err));
       }
-      loginBtn.disabled = false;
     }
 
     function scheduleModePersistent() {
