@@ -337,6 +337,17 @@
       transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
     }
     input::placeholder, textarea::placeholder { color: rgba(230, 237, 247, 0.4); }
+    input[readonly] {
+      cursor: not-allowed;
+      color: #fdba74;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      background: linear-gradient(180deg, rgba(249, 115, 22, 0.1), rgba(0, 0, 0, 0.34));
+    }
+    input[readonly]:focus {
+      border-color: rgba(249, 115, 22, 0.18);
+      box-shadow: none;
+    }
     input:hover, textarea:hover, select:hover { border-color: rgba(74, 222, 128, 0.28); }
     input:focus, textarea:focus, select:focus {
       outline: none;
@@ -345,6 +356,130 @@
       background: rgba(0, 0, 0, 0.42);
     }
     textarea { min-height: 60px; resize: none; }
+    .preset-dd {
+      position: relative;
+      margin-bottom: 0.55rem;
+    }
+    .preset-trigger {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      background: rgba(0, 0, 0, 0.34);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+    }
+    .preset-trigger:hover {
+      border-color: rgba(249, 115, 22, 0.32);
+    }
+    .preset-trigger[aria-expanded="true"] {
+      border-color: rgba(249, 115, 22, 0.55);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+      background: rgba(0, 0, 0, 0.42);
+    }
+    .preset-trigger__label {
+      flex: 1 1 auto;
+      min-width: 0;
+      text-align: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: rgba(230, 237, 247, 0.55);
+    }
+    .preset-trigger.has-value .preset-trigger__label {
+      color: var(--text);
+    }
+    .preset-trigger__caret {
+      flex: 0 0 auto;
+      width: 16px;
+      height: 16px;
+      color: #fdba74;
+      transition: transform 0.2s ease;
+    }
+    .preset-trigger[aria-expanded="true"] .preset-trigger__caret {
+      transform: rotate(180deg);
+    }
+    .preset-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      position: absolute;
+      top: calc(100% + 0.35rem);
+      left: 0;
+      right: 0;
+      z-index: 5;
+      padding: 0.4rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background:
+        linear-gradient(180deg, rgba(20, 28, 24, 0.96), rgba(15, 22, 19, 0.96));
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
+      box-shadow: 0 18px 38px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(74, 222, 128, 0.06);
+      max-height: 240px;
+      overflow-y: auto;
+      animation: presetOpen 0.18s ease-out;
+    }
+    .preset-list[hidden] { display: none; }
+    @keyframes presetOpen {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .preset-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(0, 0, 0, 0.22));
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.82rem;
+      line-height: 1.35;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s, transform 0.12s, box-shadow 0.18s;
+    }
+    .preset-item:hover {
+      border-color: rgba(249, 115, 22, 0.32);
+      background: linear-gradient(180deg, rgba(249, 115, 22, 0.08), rgba(0, 0, 0, 0.22));
+    }
+    .preset-item:active { transform: scale(0.99); }
+    .preset-item.is-active {
+      border-color: rgba(74, 222, 128, 0.42);
+      background:
+        linear-gradient(180deg, rgba(34, 197, 94, 0.12), rgba(34, 197, 94, 0.04));
+      box-shadow: 0 0 0 1px rgba(74, 222, 128, 0.14), 0 6px 18px rgba(34, 197, 94, 0.18);
+    }
+    .preset-item__num {
+      flex: 0 0 auto;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #fdba74;
+      background: rgba(249, 115, 22, 0.16);
+      border: 1px solid rgba(249, 115, 22, 0.28);
+      margin-top: 1px;
+    }
+    .preset-item.is-active .preset-item__num {
+      color: #06140a;
+      background: linear-gradient(135deg, var(--green-2), var(--green));
+      border-color: rgba(74, 222, 128, 0.5);
+    }
+    .preset-item__text { flex: 1 1 auto; min-width: 0; }
     button.primary {
       position: relative;
       width: 100%;
@@ -385,6 +520,46 @@
       background: linear-gradient(135deg, var(--green-2) 0%, var(--green) 100%);
       box-shadow: 0 8px 26px var(--green-glow), 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.28);
     }
+    button.primary .btn-content {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    button.primary .btn-spinner {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 247, 237, 0.32);
+      border-top-color: #fff7ed;
+      animation: btnSpin 0.7s linear infinite;
+      display: none;
+    }
+    button.primary .btn-check {
+      width: 16px;
+      height: 16px;
+      display: none;
+      stroke: currentColor;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+    button.primary .btn-check path {
+      stroke-dasharray: 24;
+      stroke-dashoffset: 24;
+    }
+    button.primary.is-loading {
+      cursor: progress;
+      opacity: 0.92;
+    }
+    button.primary.is-loading::after { display: none; }
+    button.primary.is-loading .btn-spinner { display: inline-block; }
+    button.primary.is-success { background: linear-gradient(135deg, var(--green-2) 0%, var(--green) 100%); color: #06140a; box-shadow: 0 8px 26px var(--green-glow), 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.28); }
+    button.primary.is-success .btn-check { display: inline-block; }
+    button.primary.is-success .btn-check path { animation: btnDrawCheck 0.4s ease-out forwards; }
+    @keyframes btnSpin { to { transform: rotate(360deg); } }
+    @keyframes btnDrawCheck { to { stroke-dashoffset: 0; } }
     button.ghost, button.danger-ghost {
       flex: 1;
       padding: 0.55rem 0.7rem;
@@ -783,7 +958,13 @@
           </svg>
         </button>
       </div>
-      <button type="button" class="primary" id="loginBtn">Sign in</button>
+      <button type="button" class="primary" id="loginBtn">
+        <span class="btn-content">
+          <span class="btn-spinner" aria-hidden="true"></span>
+          <svg class="btn-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+          <span class="btn-label" id="loginBtnLabel">Sign in</span>
+        </span>
+      </button>
       <div id="loginOut" class="out"></div>
     </div>
 
@@ -794,11 +975,44 @@
       </p>
       <form id="f">
         <label for="title">Title</label>
-        <input id="title" type="text" placeholder="Optional" autocomplete="off" />
+        <input id="title" type="text" value="BET MAKINI" readonly autocomplete="off" />
         <label for="body">Message</label>
-        <textarea id="body" placeholder="Optional"></textarea>
-        <label for="image">Image URL</label>
-        <input id="image" type="url" placeholder="https://..." autocomplete="off" />
+        <div class="preset-dd" id="presetDd">
+          <button type="button" class="preset-trigger" id="presetTrigger" aria-haspopup="listbox" aria-expanded="false">
+            <span class="preset-trigger__label" id="presetTriggerLabel">Choose preset message</span>
+            <svg class="preset-trigger__caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="preset-list" role="listbox" aria-label="Choose a preset message" hidden>
+            <button type="button" class="preset-item" data-preset="New betslip updated from tipster Profit nation with 2.10 odds, price of 1,000/=." role="option">
+              <span class="preset-item__num">1</span>
+              <span class="preset-item__text">New betslip updated from tipster Profit nation with 2.10 odds, price of 1,000/=.</span>
+            </button>
+            <button type="button" class="preset-item" data-preset='New betslip updated from tipster Thd mkamaria with 2.10 odds, price of 1,000/=.' role="option">
+              <span class="preset-item__num">2</span>
+              <span class="preset-item__text">New betslip updated from tipster Thd mkamaria with 2.10 odds, price of 1,000/=.</span>
+            </button>
+            <button type="button" class="preset-item" data-preset="New betslip updated from tipster De boss with 2.10 odds, price of 1,000/=." role="option">
+              <span class="preset-item__num">3</span>
+              <span class="preset-item__text">New betslip updated from tipster De boss with 2.10 odds, price of 1,000/=.</span>
+            </button>
+            <button type="button" class="preset-item" data-preset="New betslip updated from tipster Rhino with 2.10 odds, price of 1,000/=." role="option">
+              <span class="preset-item__num">4</span>
+              <span class="preset-item__text">New betslip updated from tipster Rhino with 2.10 odds, price of 1,000/=.</span>
+            </button>
+            <button type="button" class="preset-item" data-preset="New betslip updated from tipster Kiboko ya kanji with 2.10 odds, price of 1,000/=." role="option">
+              <span class="preset-item__num">5</span>
+              <span class="preset-item__text">New betslip updated from tipster Kiboko ya kanji with 2.10 odds, price of 1,000/=.</span>
+            </button>
+            <button type="button" class="preset-item" data-preset="https://i.postimg.cc/ryBc7sGs/BETMAKINI-LOGO.jpg" role="option">
+              <span class="preset-item__num">6</span>
+              <span class="preset-item__text">https://i.postimg.cc/ryBc7sGs/BETMAKINI-LOGO.jpg</span>
+            </button>
+          </div>
+        </div>
+        <textarea id="body" placeholder="Tap the dropdown above or type here..."></textarea>
+        <input id="image" type="hidden" value="https://i.postimg.cc/ryBc7sGs/BETMAKINI-LOGO.jpg" />
         <button type="submit" class="primary" id="btn">Send now</button>
       </form>
       <div id="out" class="out" aria-live="polite"></div>
@@ -843,7 +1057,7 @@
         <label for="sBody">Message</label>
         <textarea id="sBody" placeholder="Optional"></textarea>
         <label for="sImage">Image URL</label>
-        <input id="sImage" type="url" placeholder="https://..." />
+        <input id="sImage" type="url" value="https://i.postimg.cc/ryBc7sGs/BETMAKINI-LOGO.jpg" placeholder="https://..." />
         <!-- JSON-based schedule (once / daily): only available when schedulePersistent === true (persistent storage). -->
         <div id="schedTimingWrap">
           <label for="sMode">Type</label>
@@ -914,21 +1128,41 @@
       return res.ok;
     }
 
+    const loginBtnLabel = document.getElementById('loginBtnLabel');
+    function setLoginBtnState(state) {
+      // state: 'idle' | 'loading' | 'success'
+      loginBtn.classList.remove('is-loading', 'is-success');
+      if (state === 'loading') {
+        loginBtn.classList.add('is-loading');
+        loginBtn.disabled = true;
+        if (loginBtnLabel) loginBtnLabel.textContent = 'Verifying...';
+      } else if (state === 'success') {
+        loginBtn.classList.add('is-success');
+        loginBtn.disabled = true;
+        if (loginBtnLabel) loginBtnLabel.textContent = 'Signed in';
+      } else {
+        loginBtn.disabled = false;
+        if (loginBtnLabel) loginBtnLabel.textContent = 'Sign in';
+      }
+    }
+
     async function tryLogin() {
       const secret = (adminInput.value || '').trim();
       if (!secret) {
         loginOut.className = 'out err';
         loginOut.textContent = 'Enter the admin password.';
+        try { adminInput.focus(); } catch (_) {}
         return;
       }
       loginOut.className = 'out';
-      loginOut.textContent = 'Verifying...';
-      loginBtn.disabled = true;
+      loginOut.textContent = '';
+      setLoginBtnState('loading');
       try {
         const ok = await verifyAdminSecret(secret);
         if (!ok) {
           adminAuthenticated = false;
           sessionStorage.removeItem(ADMIN_KEY);
+          setLoginBtnState('idle');
           loginOut.className = 'out err';
           loginOut.textContent = 'Incorrect password.';
           applyLoginGate();
@@ -937,15 +1171,20 @@
         }
         adminAuthenticated = true;
         sessionStorage.setItem(ADMIN_KEY, secret);
-        loginOut.className = 'out ok';
-        loginOut.textContent = 'Signed in.';
-        applyLoginGate();
-        updateAuthGates();
+        setLoginBtnState('success');
+        loginOut.className = 'out';
+        loginOut.textContent = '';
+        // Brief pause so the user sees the success state before the panel swap
+        setTimeout(() => {
+          applyLoginGate();
+          updateAuthGates();
+          setLoginBtnState('idle');
+        }, 550);
       } catch (err) {
+        setLoginBtnState('idle');
         loginOut.className = 'out err';
         loginOut.textContent = 'Network: ' + (err && err.message ? err.message : String(err));
       }
-      loginBtn.disabled = false;
     }
 
     function scheduleModePersistent() {
@@ -1183,6 +1422,71 @@
       successHideTimer = setTimeout(() => { successCard.hidden = true; }, 6000);
     }
 
+    // Preset message dropdown
+    (function () {
+      const bodyInput = document.getElementById('body');
+      const trigger = document.getElementById('presetTrigger');
+      const triggerLabel = document.getElementById('presetTriggerLabel');
+      const list = document.querySelector('#presetDd .preset-list');
+      const presetItems = document.querySelectorAll('.preset-item');
+      if (!bodyInput || !trigger || !list) return;
+
+      const DEFAULT_LABEL = 'Choose preset message';
+
+      function openList() {
+        list.hidden = false;
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+      function closeList() {
+        list.hidden = true;
+        trigger.setAttribute('aria-expanded', 'false');
+      }
+      function toggleList() {
+        if (list.hidden) openList(); else closeList();
+      }
+
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleList();
+      });
+
+      presetItems.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const text = btn.getAttribute('data-preset') || '';
+          const num = btn.querySelector('.preset-item__num');
+          bodyInput.value = text;
+          presetItems.forEach((b) => b.classList.remove('is-active'));
+          btn.classList.add('is-active');
+          triggerLabel.textContent = num ? ('Preset ' + num.textContent + ' selected') : 'Preset selected';
+          trigger.classList.add('has-value');
+          closeList();
+          try { bodyInput.focus({ preventScroll: true }); } catch (_) { bodyInput.focus(); }
+          try { bodyInput.setSelectionRange(text.length, text.length); } catch (_) {}
+        });
+      });
+
+      bodyInput.addEventListener('input', () => {
+        const current = bodyInput.value;
+        let stillMatches = false;
+        presetItems.forEach((b) => {
+          if (b.getAttribute('data-preset') === current) stillMatches = true;
+          else b.classList.remove('is-active');
+        });
+        if (!stillMatches) {
+          triggerLabel.textContent = DEFAULT_LABEL;
+          trigger.classList.remove('has-value');
+        }
+      });
+
+      document.addEventListener('click', (e) => {
+        if (list.hidden) return;
+        if (!document.getElementById('presetDd').contains(e.target)) closeList();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !list.hidden) closeList();
+      });
+    })();
+
     document.getElementById('f').addEventListener('submit', async (e) => {
       e.preventDefault();
       hideSuccessCard();
@@ -1196,7 +1500,7 @@
       out.textContent = '';
       out.className = 'out';
       btn.disabled = true;
-      const title = document.getElementById('title').value.trim();
+      const title = 'BET MAKINI';
       const body = document.getElementById('body').value.trim();
       const image = document.getElementById('image').value.trim();
       try {
